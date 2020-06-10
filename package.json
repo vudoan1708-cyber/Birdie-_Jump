@@ -1,0 +1,28 @@
+{
+  "name": "birdie-jump",
+  "version": "1.0.0",
+  "description": "a game with birds",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vudoan1708-cyber/Birdie-_Jump.git"
+  },
+  "keywords": [
+    "game",
+    "birds"
+  ],
+  "author": "Vu Doan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vudoan1708-cyber/Birdie-_Jump/issues"
+  },
+  "homepage": "https://github.com/vudoan1708-cyber/Birdie-_Jump#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nedb": "^1.8.0"
+  }
+}
