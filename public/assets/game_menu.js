@@ -148,8 +148,7 @@ class Button {
             textAlign(CENTER);
             textFont("Georgia");
             textSize(35);
-            text("PLAY", this.x_btn, this.y_btn + 10);
-            console.log("Hovering");
+            text("PLAY", this.x_btn, this.y_btn + 10)
 
             textSize(20);
             text("OVER THE PLANES", this.x_btn, this.y_btn + 100);
@@ -178,7 +177,6 @@ class Button {
             textFont("Georgia");
             textSize(35);
             text("PLAY", this.x_btn + 2 * x_menu / 4, this.y_btn + 10);
-            console.log("Hovering 2");
 
             textSize(20);
             text("GAME OF THORNS", this.x_btn + 2 * x_menu / 4, this.y_btn + 100);
