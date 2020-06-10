@@ -655,7 +655,6 @@ function display() {
 
 		// plane hits bird
 		if (plane[i].hits(birdie)) {
-			// console.log("HIT");
 			noLoop();
 			hit.play();
 			setTimeout(resetGameDisplay, 2200); //display game reset function
@@ -666,7 +665,6 @@ function display() {
 		if (wall.h == -3 * d) { //if wall is up
 			if (plane[i].bump(wall)) { // if plane bumps to the wall
 				plane[i].pause();
-				// console.log("BUMPED");
 			}
 		}
 		if (portal_ShowTime) { // only when the portal is shown, will planes enter into it

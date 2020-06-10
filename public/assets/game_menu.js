@@ -186,9 +186,6 @@ class Button {
             hover_play_button2.stop(); //stop the sound
             hoverPlayed2 = false;
         }
-
-
-
     }
 
 }
