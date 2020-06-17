@@ -144,7 +144,8 @@ async function AccValidation(num) {
 	
 	// get the input HTML element
 	const account_signinHTML = document.getElementById('account'),
-		account_signupHTML = document.getElementById('signup');
+		account_signupHTML = document.getElementById('signup'),
+		signInChecked = document.getElementById('signInChecked');
 
 	// CHANGING BETWEEN SIGN-IN AND SIGN-UP SCREEN
 	if (num == -1) {
@@ -158,8 +159,9 @@ async function AccValidation(num) {
 		account_signupHTML.style.visibility = 'hidden';
 		account_signupHTML.style.opacity = 0;
 
+		accAvailable[3].style.visibility = 'hidden';
 		accAvailable[2].style.visibility = 'hidden';
-		accAvailable[1].style.visibility = 'hidden';
+		accAvailable[0].style.visibility = 'hidden';
 	}
 	
 	// SIGN-UP
@@ -174,22 +176,22 @@ async function AccValidation(num) {
 			// check if the account has been signed up
 			if (account_name_up.value == account[a].account_name) {
 				
-				if (accAvailable[2].style.visibility == 'visible') {
-					accAvailable[2].style.visibility = 'hidden';
+				if (accAvailable[3].style.visibility == 'visible') {
+					accAvailable[3].style.visibility = 'hidden';
 				}
 
-				accAvailable[1].style.visibility = 'visible';
+				accAvailable[2].style.visibility = 'visible';
 				break;
 			}
 
 			// or if there's no user input
 			else if (account_name_up.value == '') {
 
-				if (accAvailable[1].style.visibility == 'visible') {
-					accAvailable[1].style.visibility = 'hidden';
+				if (accAvailable[2].style.visibility == 'visible') {
+					accAvailable[2].style.visibility = 'hidden';
 				}
 
-				accAvailable[2].style.visibility = 'visible';
+				accAvailable[3].style.visibility = 'visible';
 				break;
 			}
 
@@ -251,8 +253,18 @@ async function AccValidation(num) {
 
 					// start the welcome section
 					mode = 0;
-				} else {
 
+				// or if there is no user input
+				} else if (account_name_in.value == '' 
+					&& pass_in.value == '') {
+						signInChecked.innerHTML = 'You need to provide information before proceeding';
+						signInChecked.style.visibility = 'visible';
+				}
+				
+				// otherwise
+				else {
+					signInChecked.innerHTML = 'This account does not exist';
+					signInChecked.style.visibility = 'visible';
 				}
 		}
 	}

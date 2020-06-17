@@ -30,6 +30,7 @@
 				<div style="position: relative; width: 25%; margin: 20px auto" role="text holder">
 					<h3 style="text-align: left;">LOGIN</h3>
 				</div>
+				<p id="signInChecked"></p>
 				<input id="account_name_in" type="text" name="account_name_in" aria-label="account" placeholder="Enter Your Account Name"><br /><br />
 				<input id="pass_in" type="password" name="pass_in" aria-label="account password" placeholder="Enter Your Password"><br /><br />
 				<div class="accBtn" onclick="AccValidation(1)" role="button">ENTER</div>
@@ -37,7 +38,7 @@
 			</div>
 
 			<div id="signup" role="container">
-				<div style="margin: 20px; cursor: pointer; width: 10%; text-align: center; background-color: antiquewhite; border-radius: 15px;" onclick="AccValidation(null)" role="button">
+				<div id="backBtn" onclick="AccValidation(null)" role="button">
 					<h3><<<<</h3>
 				</div>
 				<input id="account_name_up" type="text" name="account_name_up" aria-label="account" placeholder="Enter A New Account Name"><br /><br />
