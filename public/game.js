@@ -97,7 +97,8 @@ let touchScreen = false;
 	birdie2Fall = false,
 	jumpTriggered = false,
 	pushPlane = false,
-	loadingGame = true;
+	loadingGame = true,
+	lost = false;
 
 let countUpPortal = 0,
 	jumpTime = 0,
@@ -252,7 +253,6 @@ async function AccValidation(num) {
 					mode = 0;
 				} else {
 
-					console.log('NOPE')
 				}
 		}
 	}
@@ -326,30 +326,26 @@ function setup() {
 	hitWood = loadSound("assets/sound effects/hitWood.mp3", mediaLoader);
 	portal_enter = loadSound("assets/sound effects/portal_enter.mp3", mediaLoader);
 
-	//voice over
-	//very good
+	// VOICE OVER
+	// very good
 	gameOver_VoiceOverVerygood[0] = loadSound("assets/sound effects/voice_over/call it a day.mp3", mediaLoader);
 	gameOver_VoiceOverVerygood[1] = loadSound("assets/sound effects/voice_over/damn good hacker.mp3", mediaLoader);
 	gameOver_VoiceOverVerygood[2] = loadSound("assets/sound effects/voice_over/hack my game.mp3", mediaLoader);
-	//really bad
+
+	// really bad
 	gameOver_VoiceOverbad[0] = loadSound("assets/sound effects/voice_over/i won't say anything.mp3", mediaLoader);
 	gameOver_VoiceOverbad[1] = loadSound("assets/sound effects/voice_over/is ur day that bad.mp3", mediaLoader);
 	gameOver_VoiceOverbad[2] = loadSound("assets/sound effects/voice_over/little piece of lovee.mp3", mediaLoader);
 	gameOver_VoiceOverbad[3] = loadSound("assets/sound effects/voice_over/more practice.mp3", mediaLoader);
 	gameOver_VoiceOverbad[4] = loadSound("assets/sound effects/voice_over/amazing.mp3", mediaLoader);
 
-	//good
+	// good
 	gameOver_VoiceOvergood[0] = loadSound("assets/sound effects/voice_over/not toooo bad.mp3", mediaLoader);
 	gameOver_VoiceOvergood[1] = loadSound("assets/sound effects/voice_over/need some help.mp3", mediaLoader);
-	//okay
+
+	// okay
 	gameOver_VoiceOverokay[0] = loadSound("assets/sound effects/voice_over/that's kinda nice.mp3", mediaLoader);
 	gameOver_VoiceOverokay[1] = loadSound("assets/sound effects/voice_over/how much I score.mp3", mediaLoader);
-	// grid = create2DArray(cols_mode3, rows_mode3);
-	// for (let i = 0; i < cols_mode3; i++) {
-	// 	for (let j = 0; j < rows_mode3 * 4; j += 50) {
-	// 		grid[i][j] = new Number(i, j, w, h);
-	// 	}
-	// }
 }
 
 //game function
@@ -421,6 +417,20 @@ function touchStarted() {
 				if (mouseY > 0 && mouseY < height) {
 					birdie2.jump();
 					flap.play();
+				}
+			}
+		}
+	}
+
+	// restart game
+	if (lost) {
+		if (touchScreen) {
+			if (mouseX > 0 && mouseX < width) {
+				if (mouseY > 0 && mouseY < height) {
+					mode = 0;
+					loop();
+					playGame();
+					restartGamePlay();
 				}
 			}
 		}
@@ -559,6 +569,81 @@ function playGame() {
 	}
 }
 
+// reset every global variable back to the starting point
+async function restartGamePlay() {
+	
+	// update the highest score
+	await getHighestScore();
+	
+	lost = false;
+
+	// mode 1
+	plane.splice(0);
+	bonusMode1.splice(0);
+	bonusMode1_2.splice(0);
+	suns.show();
+	score = 0;
+	
+	// reset time for instructions
+	instructionTime = 0;
+	instructionClose1 = false;
+	if (instructionTime < 150) {
+		if (!instructionClose1) {
+			instruction();
+			instructionTime++;
+			btn.showClose();
+		}
+	} else {
+		instructionClose1 = true;
+	}
+	if (instructionClose1) {
+		pushPlane = true;
+	}
+
+	// TELEPORT PORTAL
+	countUpPortal = 200;
+	portal_ShowTime = true;
+	if (portal_ShowTime) {
+		countUpPortal++; // count time for portal show time
+
+		if (countUpPortal < 200) {
+			portal.show_portal1();
+			portal.show_portal2();
+
+		} else {
+			countUpPortal = 0;
+			portal_ShowTime = false;
+		}
+
+	}
+	
+	// WALL, and birdie's size in mode 2
+	countUp = 400;
+	Counter_Wall_Up = true;
+	if (Counter_Wall_Up) {
+		countUp++;
+		if (countUp < 200) {
+			wall.buildUp();
+		} else {
+			wall.h = d;
+			Counter_Wall_Up = false;
+			countUp = 0;
+		}
+	}
+
+	// mode 2
+	floors.splice(0);
+	bonus.splice(0);
+	bonus2.splice(0);
+	time = 0;
+	instructionClose2 = false;
+	jumpTriggered = false;
+	birdie2.x_pos = width / 4 * 3;
+	birdie2.y_pos = 0;
+	birdie2.size = 70;
+	counterTriggered = false;
+}
+
 //if mouse is clicked on the assigned area, game is ready to play
 function mousePressed() {
 	if (mode == 0) { //if the game is not playing, click and play the game
@@ -587,6 +672,18 @@ function mousePressed() {
 			if (instructionTime < 150) {
 				instructionClose1 = true;
 				hover_play_button.play();
+			}
+		}
+	}
+
+	// restart game
+	if (lost) {
+		if (mouseX > 0 && mouseX < width) {
+			if (mouseY > 0 && mouseY < height) {
+				mode = 0;
+				loop();
+				playGame();
+				restartGamePlay();
 			}
 		}
 	}
@@ -632,7 +729,8 @@ function draw() {
 }
 
 async function resetGameDisplay() {
-	
+	lost = true;
+
 	push();
 	rectMode(CENTER);
 	fill(10, 80);
@@ -857,7 +955,7 @@ async function resetGameDisplay() {
 		}
 	}
 	fill(255);
-	text("Press F5 to restart", width / 2, height / 2 + d / 5);
+	text("Press anywhere to restart", width / 2, height / 2 + d / 5);
 	pop();
 }
 
@@ -899,6 +997,7 @@ function drawPlanes() {
 
 //mode 1
 function display() {
+
 	//loop for creating and animating an array of object: planes	
 	for (let i = plane.length - 1; i >= 0; i--) {
 		plane[i].show();
