@@ -67,44 +67,52 @@ let sizeReduceSound;
 let brick;
 let portal_enter;
 let hitWood;
-let gameOver_VoiceOverbad = [];
-let gameOver_VoiceOverVerygood = [];
-let gameOver_VoiceOvergood = [];
-let gameOver_VoiceOverokay = [];
+
+let gameOver_VoiceOverbad = [],
+	gameOver_VoiceOverVerygood = [],
+	gameOver_VoiceOvergood = [],
+	gameOver_VoiceOverokay = [];
 
 //game mechanism
 let loading = true;
 
-let mode = 0;
-let score = 0;
-let time = 0;
-let thornSize = 60;
+let mode = -1,
+	score = 0,
+	time = 0,
+	thornSize = 60,
+	countUp = 0;
+
 let touchScreen = false;
-let hoverPlayed = false;
-let hoverPlayed2 = false;
-let fallSound = false;
-let hitOnce = false;
-let countUp = 0;
-let counterTriggered = false;
-let instructionClose2 = false;
-let instructionClose1 = false;
-let imgReverse = false;
-let Counter_Wall_Up = false;
-let portal_ShowTime = false;
-let WoodGetHit = false;
-let birdie2Fall = false;
-let jumpTriggered = false;
-let pushPlane = false;
-let loadingGame = true;
-let countUpPortal = 0;
-let jumpTime = 0;
-let numImg = 17;
-let numSounds = 27;
-let loadingElement = 0;
+	hoverPlayed = false,
+	hoverPlayed2 = false,
+	fallSound = false,
+	hitOnce = false,
+	counterTriggered = false,
+	instructionClose2 = false,
+	instructionClose1 = false,
+	imgReverse = false,
+	Counter_Wall_Up = false,
+	portal_ShowTime = false,
+	WoodGetHit = false,
+	birdie2Fall = false,
+	jumpTriggered = false,
+	pushPlane = false,
+	loadingGame = true;
+
+let countUpPortal = 0,
+	jumpTime = 0,
+	numImg = 17,
+	numSounds = 27,
+	loadingElement = 0;
 
 let highestScore = null,
-	highestScore2 = null;
-// let gameResetShow = false;
+	highestScore2 = null,
+	account = null;
+
+let account_name,
+	pass;
+
+const accAvailable = document.getElementsByTagName('p');
 
 // get the highest score from the database
 async function getHighestScore() {
@@ -116,6 +124,12 @@ async function getHighestScore() {
 	return highestScore, highestScore2;
 }
 
+async function getAcc() {
+	const response = await fetch('/acc/');
+	account = await response.json();
+	return account;
+}
+
 function mediaLoader() {
 	loadingElement++;
 	if (loadingElement == (numImg + numSounds)) {
@@ -125,8 +139,130 @@ function mediaLoader() {
 	}
 }
 
-async function setup() {
-	await getHighestScore();
+async function AccValidation(num) {
+	
+	// get the input HTML element
+	const account_signinHTML = document.getElementById('account'),
+		account_signupHTML = document.getElementById('signup');
+
+	// CHANGING BETWEEN SIGN-IN AND SIGN-UP SCREEN
+	if (num == -1) {
+		account_signinHTML.style.visibility = 'hidden';
+		account_signinHTML.style.opacity = 0;
+		account_signupHTML.style.visibility = 'visible';
+		account_signupHTML.style.opacity = 1;
+	} else if (num == null) {
+		account_signinHTML.style.visibility = 'visible';
+		account_signinHTML.style.opacity = 1;
+		account_signupHTML.style.visibility = 'hidden';
+		account_signupHTML.style.opacity = 0;
+
+		accAvailable[2].style.visibility = 'hidden';
+		accAvailable[1].style.visibility = 'hidden';
+	}
+	
+	// SIGN-UP
+	if (num == 0) {
+
+		// get account data from the database
+		await getAcc();
+
+		// loop through the obtained data
+		for (let a = 0; a < account.length; a++) {
+
+			// check if the account has been signed up
+			if (account_name_up.value == account[a].account_name) {
+				
+				if (accAvailable[2].style.visibility == 'visible') {
+					accAvailable[2].style.visibility = 'hidden';
+				}
+
+				accAvailable[1].style.visibility = 'visible';
+				break;
+			}
+
+			// or if there's no user input
+			else if (account_name_up.value == '') {
+
+				if (accAvailable[1].style.visibility == 'visible') {
+					accAvailable[1].style.visibility = 'hidden';
+				}
+
+				accAvailable[2].style.visibility = 'visible';
+				break;
+			}
+
+			// otherwise
+			else if (account_name_up.value != account[a].account_name) {
+
+				// check if every data is checked
+				if (a == account.length - 1) {
+
+					// create a data object with account and password data
+					const data = {
+						account_name: account_name_up.value,
+						password: pass_up.value
+					}
+
+					// create option 
+					const options = {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(data)
+					};
+
+					// create a response to an endpoint 
+					const response = await fetch('/acc/', options);
+					await response.json();
+
+					account_signinHTML.style.visibility = 'visible';
+					account_signinHTML.style.opacity = 1;
+					account_signupHTML.style.visibility = 'hidden';
+
+					break;
+				}
+			}
+		}
+	}
+
+	// SIGN-IN / LOG-IN
+	else if(num == 1) {
+
+		// get account data from the database
+		await getAcc();
+
+		// wait for data to be obtained, then loop through it
+		for (let a = 0; a < account.length; a++) {
+			
+			// check for validation
+			if (account_name_in.value == account[a].account_name 
+				&& pass_in.value == account[a].password) {
+
+					account_signinHTML.style.display = 'none';
+					account_signupHTML.style.display = 'none';
+
+					// assign the signed-in account data to a global variable
+					// to post the data to database after the gameplay
+					account_name = account_name_in.value;
+					pass = pass_in.value;
+
+					// start the welcome section
+					mode = 0;
+				} else {
+
+					console.log('NOPE')
+				}
+		}
+	}
+
+	if (mode == 0) {
+		await getHighestScore();
+	}
+}
+
+function setup() {
 	createCanvas(1200, 450).parent("canvasHolder");
 	angleMode(DEGREES);
 	textAlign(CENTER);
@@ -291,14 +427,6 @@ function touchStarted() {
 	}
 }
 
-//2D array
-function create2DArray(cols_mode3, rows_mode3) {
-	let arr = new Array(cols_mode3);
-	for (let i = 0; i < arr.length; i++) {
-		arr[i] = new Array(rows_mode3);
-	}
-	return arr;
-}
 
 function instruction() {
 	background(51, 220);
@@ -324,7 +452,19 @@ function instruction() {
 
 //as soon as all the conditions are satisfied in mousePressed, the game will be executed
 function playGame() {
-	if (mode == 0) {
+
+	// sign-up / log-in section
+	if (mode == -1) {
+		background(59, 204, 202);
+		
+		// get the input HTML element
+		const account_signinHTML = document.getElementById('account');
+		account_signinHTML.style.visibility = 'visible';
+	}
+
+	// welcome screen
+	else if (mode == 0) {
+
 		background(55, 204, 187, 80);
 		cols.show();
 		birdie.show4(); //purple fat bird
@@ -338,6 +478,7 @@ function playGame() {
 		closeBtn_Hovered = false;
 		// gameResetShow = false;
 
+	// mode 1
 	} else if (mode == 1) {
 		//draw background and foreground elements
 		background(bgImg);
@@ -348,6 +489,7 @@ function playGame() {
 		birdie.move();
 		drawPlanes();
 		display();
+
 		// set time for instructions
 		if (instructionTime < 150) {
 			if (!instructionClose1) {
@@ -362,7 +504,7 @@ function playGame() {
 			pushPlane = true;
 		}
 
-
+	// mode 2
 	} else if (mode == 2) {
 		background(bgGarden);
 		drawBonus();
@@ -476,8 +618,9 @@ function draw() {
 		let dy = r * sin(angle);
 
 		beginShape();
-		vertex(x + dx, y + dy);
+			vertex(x + dx, y + dy);
 		endShape(CLOSE);
+
 		strokeWeight(2);
 		line(x, y, x + dx, y + dy);
 		textSize(15);
@@ -489,7 +632,7 @@ function draw() {
 }
 
 async function resetGameDisplay() {
-	// if (!gameResetShow) { //if lost, display
+	
 	push();
 	rectMode(CENTER);
 	fill(10, 80);
@@ -500,70 +643,78 @@ async function resetGameDisplay() {
 	fill(255);
 	textSize(width / 30);
 	textFont("Georgia");
+
 	if (mode == 1) {
-		push();
-			textSize(width / 40);
-			text("Highest Score is : " + highestScore[0].score, width / 2, height / 2 - 180 + d / 1.5);
-		pop();
 
-		// check if there is data from the database
-		if (highestScore != undefined || highestScore != null) {
+		// loop through the obtained score data
+		for (let s = 0; s < highestScore.length; s++) {
 
-			// and if the highest score is less than current score
-			if (highestScore[0].score < score) {
-				
-				// post the score to the database
-				// create a data instance to store data
-				const data = {
-					score
-				};
+			// check for the accounts
+			if (account_name == highestScore[s].account_name) {
 
-				// create options
-				const options = {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify(data)
-				};
+				push();
+					textSize(width / 40);
+					text("Highest Score is : " + highestScore[s].score, width / 2, height / 2 - 180 + d / 1.5);
+				pop();
 
-				// fetch the endpoint
-				const response = await fetch('/score/', options);
-				await response.json();
+				// check if there is data from the database
+				if (highestScore != undefined || highestScore != null) {
 
-				// change fill color
-				fill(0, 255, 0, 200);
-			} else fill(255, 0, 0, 200);
-		} 
+					// and if the highest score is less than current score
+					if (highestScore[s].score < score) {
+						
+						// post the data to the database
+						// create a data instance to store data
+						const data = {
+							account_name,
+							pass,
+							score
+						};
 
-		text("Your Score is: " + score, width / 2, height / 2 - 125 + d / 1.5);
-		//voice over before the reset 
-		if (score <= 5) {
-			random(gameOver_VoiceOverbad).play();
-		} else if (score > 5 && score <= 10) {
-			random(gameOver_VoiceOverokay).play();
-		} else if (score > 10 && score <= 30) {
-			random(gameOver_VoiceOvergood).play();
-		} else if (score > 30) {
-			random(gameOver_VoiceOverVerygood).play();
-		}
-	} else if (mode == 2) {
-		if (time > 1) {
-			push();
-				textSize(width / 40);
-				text("Highest Record is : " + highestScore2[0].time + " seconds", width / 2, height / 2 - 180 + d / 1.5);
-			pop();
+						// create options
+						const options = {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify(data)
+						};
 
-			// check if there is data from the database
-			if (highestScore2 != undefined || highestScore2 != null) {
+						// fetch the endpoint
+						const response = await fetch('/score/', options);
+						await response.json();
 
-				// and if the highest score is less than current score (time)
-				if (highestScore2[0].time < time) {
-					
-					// post the score to the database
+						// change fill color
+						fill(0, 255, 0, 200);
+						break;
+					} else {
+						fill(255, 0, 0, 200);
+						break;
+					}
+				}
+
+			// otherwise, which means this is the first time player
+			} else if (highestScore[s].account_name == undefined ||
+						highestScore[s].account_name == null ||
+						highestScore[s].account_name == '' ||
+						account_name != highestScore[s].account_name) {
+
+				// check if the last data is checked
+				// which means, every datum has been checked
+				// and still, there is no account name matches up with the data
+				if(s == highestScore.length - 1) {
+					push();
+						textSize(width / 40);
+						text("No Highest Record Yet", width / 2, height / 2 - 180 + d / 1.5);
+					pop();
+						
+					// no need for checking score from the database
+					// post the data to the database
 					// create a data instance to store data
 					const data = {
-						time
+						account_name,
+						pass,
+						score
 					};
 
 					// create options
@@ -576,12 +727,118 @@ async function resetGameDisplay() {
 					};
 
 					// fetch the endpoint
-					const response = await fetch('/score2/', options);
+					const response = await fetch('/score/', options);
 					await response.json();
 
 					// change fill color
 					fill(0, 255, 0, 200);
-				} else fill(255, 0, 0, 200);
+				}
+			}
+		} 
+
+		text("Your Score is: " + score, width / 2, height / 2 - 125 + d / 1.5);
+
+		//voice over before the reset 
+		if (score <= 5) {
+			random(gameOver_VoiceOverbad).play();
+		} else if (score > 5 && score <= 10) {
+			random(gameOver_VoiceOverokay).play();
+		} else if (score > 10 && score <= 30) {
+			random(gameOver_VoiceOvergood).play();
+		} else if (score > 30) {
+			random(gameOver_VoiceOverVerygood).play();
+		}
+	} else if (mode == 2) {
+		if (time > 1) {
+
+			// loop through the obtained score data
+			for (let s = 0; s < highestScore2.length; s++) {
+
+				// check for the accounts
+				if (account_name == highestScore2[s].account_name) {
+
+					push();
+						textSize(width / 40);
+						text("Highest Score is : " + highestScore2[s].time + " seconds", width / 2, height / 2 - 180 + d / 1.5);
+					pop();
+
+					// check if there is data from the database
+					if (highestScore2 != undefined || highestScore2 != null) {
+
+						// and if the highest score is less than current score
+						if (highestScore2[s].time < time) {
+							
+							// post the data to the database
+							// create a data instance to store data
+							const data = {
+								account_name,
+								pass,
+								time
+							};
+
+							// create options
+							const options = {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify(data)
+							};
+
+							// fetch the endpoint
+							const response = await fetch('/score2/', options);
+							await response.json();
+
+							// change fill color
+							fill(0, 255, 0, 200);
+							break;
+						} else {
+							fill(255, 0, 0, 200);
+							break;
+						}
+					}
+
+				// otherwise, which means this is the first time player
+				} else if (highestScore2[s].account_name == undefined ||
+							highestScore2[s].account_name == null ||
+							highestScore2[s].account_name == '' ||
+							account_name != highestScore2[s].account_name) {
+
+					// check if the last data is checked
+					// which means, every datum has been checked
+					// and still, there is no account name matches up with the data
+					if(s == highestScore2.length - 1) {
+						push();
+							textSize(width / 40);
+							text("No Highest Record Yet", width / 2, height / 2 - 180 + d / 1.5);
+						pop();
+							
+						// no need for checking score from the database
+						// post the data to the database
+						// create a data instance to store data
+						const data = {
+							account_name,
+							pass,
+							time
+						};
+
+						// create options
+						const options = {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify(data)
+						};
+
+						// fetch the endpoint
+						const response = await fetch('/score2/', options);
+						await response.json();
+
+						// change fill color
+						fill(0, 255, 0, 200);
+					}
+				}
 			}
 			text("Your Score is: " + time + " seconds", width / 2, height / 2 - 125 + d / 1.5);
 
@@ -602,11 +859,6 @@ async function resetGameDisplay() {
 	fill(255);
 	text("Press F5 to restart", width / 2, height / 2 + d / 5);
 	pop();
-
-
-	// gameResetShow = true;
-	// }
-
 }
 
 //mode 1

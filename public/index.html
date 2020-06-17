@@ -25,6 +25,27 @@
 		<script src="assets/wall.js"></script>	
 		<!-- <script src="assets/canon.js"></script>	 -->
 		<!-- <script src="assets/number.js"></script> -->
-		<div id = "canvasHolder"></div>
+		<div id = "canvasHolder" role="container">
+			<div id="account" role="container">
+				<div style="position: relative; width: 25%; margin: 20px auto" role="text holder">
+					<h3 style="text-align: left;">LOGIN</h3>
+				</div>
+				<input id="account_name_in" type="text" name="account_name_in" aria-label="account" placeholder="Enter Your Account Name"><br /><br />
+				<input id="pass_in" type="password" name="pass_in" aria-label="account password" placeholder="Enter Your Password"><br /><br />
+				<div class="accBtn" onclick="AccValidation(1)" role="button">ENTER</div>
+				<p style="color: rgb(16, 54, 204); text-decoration: underline; cursor: pointer" onclick="AccValidation(-1)">I Don't Have An Account</p>
+			</div>
+
+			<div id="signup" role="container">
+				<div style="margin: 20px; cursor: pointer; width: 10%; text-align: center; background-color: antiquewhite; border-radius: 15px;" onclick="AccValidation(null)" role="button">
+					<h3><<<<</h3>
+				</div>
+				<input id="account_name_up" type="text" name="account_name_up" aria-label="account" placeholder="Enter A New Account Name"><br /><br />
+				<input id="pass_up" type="password" name="pass_up" aria-label="account password" placeholder="Enter A New Password"><br /><br />
+				<div class="accBtn" onclick="AccValidation(0)" role="button">SIGN-UP</div>
+				<p id="accChecked">You already had this account</p>
+				<p id="fieldChecked">You need to fill in the fields to proceed</p>
+			</div>
+		</div>
 	</body>
 </html>
