@@ -464,7 +464,8 @@ function displayLeaderboard1(players, scores, num) {
 					td_body[j].style.color = 'lightgreen';
 				}
 
-				if (j == 0) td_body[j].innerHTML = players[i];
+				if (j == 0) td_body[j].innerHTML = i + 1;
+				else if (j == 1) td_body[j].innerHTML = players[i];
 				else td_body[j].innerHTML = scores[i];
 
 				// append 2 td elements to HTML
