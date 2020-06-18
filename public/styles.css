@@ -134,6 +134,8 @@ body #canvasHolder #tableDisplay {
     background-image: linear-gradient(to bottom, rgb(55, 162, 204), #69da65);
     background-repeat: no-repeat;
     background-size: cover;
+    user-select: none;
+    -moz-user-select: none;
     cursor: context-menu;
     transition: 0.25s ease-in-out;
         -webkit-transition: 0.25s ease-in-out;

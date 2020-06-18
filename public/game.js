@@ -186,7 +186,8 @@ async function AccValidation(num) {
 			}
 
 			// or if there's no user input
-			else if (account_name_up.value == '') {
+			else if (account_name_up.value == ''
+					|| pass_up.value == '') {
 
 				if (accAvailable[2].style.visibility == 'visible') {
 					accAvailable[2].style.visibility = 'hidden';
@@ -198,6 +199,17 @@ async function AccValidation(num) {
 
 			// otherwise
 			else if (account_name_up.value != account[a].account_name) {
+
+				// check if error handling is still on
+				if (accAvailable[3].style.visibility == 'visible') {
+					accAvailable[3].style.visibility = 'hidden';
+				}
+				if (accAvailable[2].style.visibility == 'visible') {
+					accAvailable[2].style.visibility = 'hidden';
+				}
+				if (accAvailable[0].style.visibility == 'visible') {
+					accAvailable[0].style.visibility = 'hidden';
+				}
 
 				// check if every data is checked
 				if (a == account.length - 1) {
@@ -221,9 +233,17 @@ async function AccValidation(num) {
 					const response = await fetch('/acc/', options);
 					await response.json();
 
+					// show the sign-in section and hide the sign-up one
 					account_signinHTML.style.visibility = 'visible';
 					account_signinHTML.style.opacity = 1;
 					account_signupHTML.style.visibility = 'hidden';
+
+					// check if the field is still full with previous account signup
+					if (account_name_up.value != '' 
+					&& pass_up.value != '') {
+						account_name_up.value = '';
+						pass_up.value = '';
+					}
 
 					break;
 				}
