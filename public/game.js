@@ -269,6 +269,10 @@ async function AccValidation(num) {
 				}
 		}
 	}
+
+	if (mode == 0) {
+		await getHighestScore();
+	}
 }
 
 function handleData(num, modeChanged) {
@@ -686,7 +690,6 @@ async function playGame() {
 
 	// welcome screen
 	else if (mode == 0) {
-		await getHighestScore();
 		
 		if (leaderboardBtn.style.opacity == 0) {
 			leaderboardBtn.style.opacity = 1;
