@@ -115,6 +115,7 @@ let account_name,
 
 const accAvailable = document.getElementsByTagName('p');
 
+
 // get the highest score from the database
 async function getHighestScore() {
 	const response = await fetch('/score/');
@@ -268,9 +269,207 @@ async function AccValidation(num) {
 				}
 		}
 	}
+}
 
-	if (mode == 0) {
-		await getHighestScore();
+function handleData(num, modeChanged) {
+	mode = modeChanged;
+
+	const leaderboardBtn = document.getElementById('leaderboardBtn'),
+		  modeBtn = document.getElementById('modeBtn'),
+		  mode1 = document.getElementById('mode1'),
+		  mode2 = document.getElementById('mode2')
+		  backBtn2 = document.getElementById('backBtn2');
+
+	if (modeChanged == -2) {
+		leaderboardBtn.childNodes[1].innerHTML = '';
+		modeBtn.style.visibility = 'visible';
+		backBtn2.style.visibility = 'visible';
+	}
+
+	// store the data
+	let players = [],
+		scores = [];
+
+	// variables to count duplicated values from the database
+	let current_account = null;
+	
+	// check for chosen mode leaderboard
+	if (num == 1) {
+
+		// reset the mode 2 button
+		mode2.style.backgroundColor = 'rgb(44, 44, 44)';
+		mode2.style.color = 'white';
+
+		// change the mode 1 button
+		mode1.style.backgroundColor = 'white';
+		mode1.style.color = 'black';
+
+		for (let i = 0; i < highestScore.length; i++) {
+
+			// check if an account is checked 
+			if (current_account != highestScore[i].account_name) {
+	
+				// check if there is inputted data in a newly created array variable
+				if (players.length != 0) {
+	
+					// reassign it to another variable
+					current_account = highestScore[i].account_name;
+	
+					// counter for repeated array elements
+					let count = 0;
+	
+					// DOUBLE CHECKS
+					// check if there is no duplicates if the same account name is repeated
+					// at different positional array elements
+					for (let p = 0; p < players.length; p++) {
+	
+						// if the account name is repeated according to the unsorted array 
+						if (current_account == players[p]) {
+							count++;
+						} 
+					}
+	
+					// after the loop, if there is no duplicates
+					if (count < 1) {
+	
+						// append data to an array
+						players.push(current_account);
+						scores.push(highestScore[i].score);
+					}
+				} else {
+	
+					// reassign it to another variable
+					current_account = highestScore[i].account_name;
+	
+					// append data to an array
+					players.push(current_account);
+					scores.push(highestScore[i].score);
+				}
+			}
+		}
+	} else if (num == 2) {
+
+		// reset the mode 1 button
+		mode1.style.backgroundColor = 'rgb(44, 44, 44)';
+		mode1.style.color = 'white';
+
+		// change the mode 2 button
+		mode2.style.backgroundColor = 'white';
+		mode2.style.color = 'black';
+
+		for (let i = 0; i < highestScore2.length; i++) {
+
+			// check if an account is checked 
+			if (current_account != highestScore2[i].account_name) {
+	
+				// check if there is inputted data in a newly created array variable
+				if (players.length != 0) {
+	
+					// reassign it to another variable
+					current_account = highestScore2[i].account_name;
+	
+					// counter for repeated array elements
+					let count = 0;
+	
+					// DOUBLE CHECKS
+					// check if there is no duplicates if the same account name is repeated
+					// at different positional array elements
+					for (let p = 0; p < players.length; p++) {
+	
+						// if the account name is repeated according to the unsorted array 
+						if (current_account == players[p]) {
+							count++;
+						} 
+					}
+	
+					// after the loop, if there is no duplicates
+					if (count < 1) {
+	
+						// append data to an array
+						players.push(current_account);
+						scores.push(highestScore2[i].time);
+					}
+				} else {
+	
+					// reassign it to another variable
+					current_account = highestScore2[i].account_name;
+	
+					// append data to an array
+					players.push(current_account);
+					scores.push(highestScore2[i].time);
+				}
+			}
+		}
+	} else if (num == 0) {
+		leaderboardBtn.childNodes[1].innerHTML = 'LEADERBOARD';
+		modeBtn.style.visibility = 'hidden';
+		backBtn2.style.visibility = 'hidden';
+
+		mode = 0;
+		playGame();
+	}
+	
+	// console.log(players, scores);
+	displayLeaderboard1(players, scores, num);
+}
+
+// LEADERBOARD
+function displayLeaderboard1(players, scores, num) {
+	const tableDisplay = document.getElementById('tableDisplay'),
+		  tableBody = document.getElementById('tableBody');
+	
+	if (num != 0) {
+		tableDisplay.style.visibility = 'visible';
+		tableDisplay.style.opacity = 1;
+
+		// get total number of th elements from HTML
+		let th = document.querySelectorAll('th'),
+		tr_body = [],
+		td_body = [];
+
+		// remove the table if applicable
+		let table_remover = document.querySelectorAll('.tr_body');
+
+		// check if there are any one of them
+		if (table_remover.length != 0) {
+			for (let t = 0; t < table_remover.length; t++) {
+				table_remover[t].remove();
+			}
+		}
+
+		// loop through the players array
+		for (let i = 0; i < players.length; i++) {
+
+			tr_body[i] = document.createElement('tr');
+
+			tr_body[i].className = 'tr_body';
+
+			// append the number of tr according to countryData length to tbody 
+			tableBody.appendChild(tr_body[i]);
+
+			// loop through the number of th HTML elements
+			for (let j = 0; j < th.length; j++) {
+
+				td_body[j] = document.createElement('td');
+
+				// assign a class name to them
+				td_body[j].className = 'td';
+
+				// check if the array element represents the first player 
+				if (i == 0) {
+					td_body[j].style.color = 'lightgreen';
+				}
+
+				if (j == 0) td_body[j].innerHTML = players[i];
+				else td_body[j].innerHTML = scores[i];
+
+				// append 2 td elements to HTML
+				tr_body[i].appendChild(td_body[j]); 
+			}
+		}
+	} else {
+		tableDisplay.style.visibility = 'hidden';
+		tableDisplay.style.opacity = 0;
 	}
 }
 
@@ -473,7 +672,8 @@ function instruction() {
 }
 
 //as soon as all the conditions are satisfied in mousePressed, the game will be executed
-function playGame() {
+async function playGame() {
+	const leaderboardBtn = document.getElementById('leaderboardBtn');
 
 	// sign-up / log-in section
 	if (mode == -1) {
@@ -486,6 +686,13 @@ function playGame() {
 
 	// welcome screen
 	else if (mode == 0) {
+		await getHighestScore();
+		
+		if (leaderboardBtn.style.opacity == 0) {
+			leaderboardBtn.style.opacity = 1;
+			leaderboardBtn.style.visibility = 'visible';
+			leaderboardBtn.childNodes[1].innerHTML = 'LEADERBOARD';
+		}
 
 		background(55, 204, 187, 80);
 		cols.show();
@@ -502,6 +709,11 @@ function playGame() {
 
 	// mode 1
 	} else if (mode == 1) {
+		if (leaderboardBtn.style.opacity == 1) {
+			leaderboardBtn.style.opacity = 0;
+			leaderboardBtn.style.visibility = 'hidden';
+		}
+
 		//draw background and foreground elements
 		background(bgImg);
 		drawBonus_Mode1();
@@ -528,6 +740,11 @@ function playGame() {
 
 	// mode 2
 	} else if (mode == 2) {
+		if (leaderboardBtn.style.opacity == 1) {
+			leaderboardBtn.style.opacity = 0;
+			leaderboardBtn.style.visibility = 'hidden';
+		}
+
 		background(bgGarden);
 		drawBonus();
 		displayBonus();
@@ -1263,65 +1480,3 @@ function display2() {
 		setTimeout(resetGameDisplay, 2200);
 	}
 }
-
-//mode 3
-// function drawBoard() {
-// 	//draw a board
-// 	//display rects and numbers in accordance to each cell's position
-// 	for (let i = 0; i < cols_mode3; i++) {
-// 		for (let j = 0; j < rows_mode3 * 4; j += 50) {
-// 			grid[i][j].show();
-// 			// if (key == " ") {
-// 			if (grid[i][j].getHit(birdie3)) { //if bird hits one of the cells
-// 				// console.log("GET NUMBER");
-
-// 				// CASE 1: if an INDIVIDUAL number gets hit EQUALS to a given number
-// 				if (grid[i][j].numbers == givenNum.arbitNum) {
-// 					if (!hitOnce) {
-// 						grid[i][j].showHit(); // turns green when gets hit
-// 						currentTotal = 0;
-// 						jumpTime = 0;
-// 						// if ( mode == 3) {
-// 						// 	score++;
-// 						// 	console.log(score);
-// 						// }
-// 						// grid[i][j].getDeleted();
-// 						grid[i][j].numbers = [int(random(1, 10))]; // re-make a new number 
-// 						givenNum.arbitNum = int(random(1, 10)); // numbers change whenever a cell is correctly hit
-// 						hitOnce = true;
-// 					}
-
-// 				}
-
-// 				// CASE 2: DIFFERENT
-// 				// CASE 2 - 1:
-// 				// an INDIVIDUAL number chosen is LARGER THAN
-// 				else if (grid[i][j].numbers > givenNum.arbitNum) {
-// 					grid[i][j].showHitWrong();
-// 					console.log("TOO MUCH");
-// 					jumpTime = 0;
-// 				}
-// 				// CASE 2 - 2: an INDIVIDUAL number chosen is LESS THAN
-// 				else {
-// 					grid[i][j].getAddedUp();
-// 				}
-
-// 			}
-
-// 		}
-
-// 	}
-// }
-
-// function drawHealthBar() {
-// 	push();
-// 	fill(255, 0, 0, 150);
-// 	rect(0, 0, width, height / 3 - d);
-// 	rect(0, height / 3, width, height / 3 + d / 2);
-// 	fill(150, 150);
-// 	textFont("Georgia");
-// 	textSize(50);
-// 	text("100 / 100", width / 2, (height / 3 - d) / 1.25);
-// 	text("100 / 100", width / 2, (height / 3 + d / 2) / 1.05);
-// 	pop();
-// }

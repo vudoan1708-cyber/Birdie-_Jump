@@ -151,7 +151,7 @@ class Button {
             text("PLAY", this.x_btn, this.y_btn + 10)
 
             textSize(20);
-            text("OVER THE PLANES", this.x_btn, this.y_btn + 100);
+            text("OVER THE PLANES", this.x_btn, this.y_btn - 60);
             pop();
 
 
@@ -179,7 +179,7 @@ class Button {
             text("PLAY", this.x_btn + 2 * x_menu / 4, this.y_btn + 10);
 
             textSize(20);
-            text("GAME OF THORNS", this.x_btn + 2 * x_menu / 4, this.y_btn + 100);
+            text("GAME OF THORNS", this.x_btn + 2 * x_menu / 4, this.y_btn - 60);
             pop();
 
         } else { //else if the button is not hovered

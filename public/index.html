@@ -47,6 +47,45 @@
 				<p id="accChecked">You already had this account</p>
 				<p id="fieldChecked">You need to fill in the fields to proceed</p>
 			</div>
+
+			<!-- TABLE: LEADERBOARD DISPLAY -->
+			<div id="tableDisplay" role="wrapper">
+				<h3 style="color: whitesmoke; margin: 20px; text-align: center;">LEADERBOARD</h3>
+				<div id="tableContainer" role="container">
+					<table>
+						<thead>
+							<tr>
+								<th>Accounts</th>
+								<th>Highest Score</th>
+							</tr>
+						</thead>
+	
+						<tbody id="tableBody">
+							
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- LEADERBOARD BUTTON -->
+			<div id="leaderboardBtn" role="button">
+				<div id="leaderboardBtnContainer" role="container" onclick="handleData(1, -2)">
+					<h3>LEADERBOARD</h3>
+				</div>
+
+				<div id="modeBtn" role="container">
+					<div id="mode1" role="button" onclick="handleData(1, -2)">
+						<h3>MODE 1</h3>
+					</div>
+	
+					<div id="mode2" role="button" onclick="handleData(2, -2)">
+						<h3>MODE 2</h3>
+					</div>
+				</div>
+			</div>
+			<div id="backBtn2" onclick="handleData(0, 0)" role="button">
+				<h3><<<<</h3>
+			</div>
 		</div>
 	</body>
 </html>
