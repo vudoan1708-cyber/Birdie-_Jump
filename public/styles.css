@@ -298,24 +298,18 @@ body #canvasHolder #leaderboardBtn #mode2:hover {
 /* scroll bar */
 
 /* width of the entire scrollbar */
-#displayMonths::-webkit-scrollbar,
-#support_container::-webkit-scrollbar,
-#tabularContainer::-webkit-scrollbar {
+#tableContainer::-webkit-scrollbar {
     width: 12px;
 }
 
 /* color of the tracking area */
-#displayMonths::-webkit-scrollbar-track,
-#support_container::-webkit-scrollbar-track,
-#tabularContainer::-webkit-scrollbar-track {
+#tableContainer::-webkit-scrollbar-track {
     border-radius: 20px;
     background: rgb(0, 0, 0);
 }
 
 
-#displayMonths::-webkit-scrollbar-thumb,
-#support_container::-webkit-scrollbar-thumb,
-#tabularContainer::-webkit-scrollbar-thumb {
+#tableContainer::-webkit-scrollbar-thumb{
     background-color: rgb(59, 204, 202);    /* color of the scroll thumb */
     border-radius: 20px;       /* roundness of the scroll thumb */
     border: 2px solid rgb(0, 0, 0);  /* creates padding around scroll thumb */
