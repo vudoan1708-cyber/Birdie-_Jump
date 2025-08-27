@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 
 const path = require('path');
+const fallback = require('express-history-api-fallback');
 
 const root = path.join(__dirname, './public');
 const port = process.env.PORT || 5000;
@@ -74,3 +75,5 @@ app.get('/acc/', function(request, response) {
 });
 
 app.use(express.static(root));
+// fallback
+app.use(fallback('index.html', { root }));
