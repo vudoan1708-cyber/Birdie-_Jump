@@ -29,7 +29,6 @@
 				if (e.code === 'Enter') {
 					AccValidation(1);
 					const timeout = setTimeout(() => {
-						console.log('signInChecked.innerHTML', signInChecked.innerHTML)
 						if (!signInChecked.innerHTML) {
 							window.removeEventListener('keypress', enterShortcut);
 						}
