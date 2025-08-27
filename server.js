@@ -1,8 +1,14 @@
 const express = require('express');
 const app = express();
+
+const path = require('path');
+
+const root = path.join(__dirname, './public');
 const port = process.env.PORT || 5000;
+
 const http = require('http');
 const server = http.createServer(app);
+
 const Datastore = require('nedb');
 const database = new Datastore('database/score.db');
 const database2 = new Datastore('database/score2.db');
@@ -11,7 +17,7 @@ database.loadDatabase();
 database2.loadDatabase();
 acc.loadDatabase();
 
-server.listen(port, () => { console.log('listening on port: ' + port) });
+server.listen(port, () => { console.log(`listening on port: ${port}`) });
 app.use(express.json({ limit: '1mb' }));
 
 app.post('/score/', function (request, response) {
@@ -67,4 +73,4 @@ app.get('/acc/', function(request, response) {
     })
 });
 
-app.use(express.static('public'));
+app.use(express.static(root));
