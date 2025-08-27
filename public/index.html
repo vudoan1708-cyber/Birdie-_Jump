@@ -11,7 +11,6 @@
 		<script src="p5/p5.js"></script>
 		<script src="p5/addons/p5.sound.js"></script>
 
-
 		<script src="game.js"></script>
 		<script src="assets/birdie.js"></script>
 		<script src="assets/plane.js"></script>
@@ -25,6 +24,21 @@
 		<script src="assets/wall.js"></script>	
 		<!-- <script src="assets/canon.js"></script>	 -->
 		<!-- <script src="assets/number.js"></script> -->
+		<script>
+			const enterShortcut = (e) => {
+				if (e.code === 'Enter') {
+					AccValidation(1);
+					const timeout = setTimeout(() => {
+						console.log('signInChecked.innerHTML', signInChecked.innerHTML)
+						if (!signInChecked.innerHTML) {
+							window.removeEventListener('keypress', enterShortcut);
+						}
+						clearTimeout(timeout);
+					}, 250);
+				}
+			};
+			window.addEventListener('keypress', enterShortcut);
+		</script>
 		<div id = "canvasHolder" role="container">
 			<div id="account" role="container">
 				<div style="position: relative; width: 25%; margin: 20px auto" role="text holder">

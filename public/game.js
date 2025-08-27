@@ -149,12 +149,12 @@ async function AccValidation(num) {
 		signInChecked = document.getElementById('signInChecked');
 
 	// CHANGING BETWEEN SIGN-IN AND SIGN-UP SCREEN
-	if (num == -1) {
+	if (num === -1) {
 		account_signinHTML.style.visibility = 'hidden';
 		account_signinHTML.style.opacity = 0;
 		account_signupHTML.style.visibility = 'visible';
 		account_signupHTML.style.opacity = 1;
-	} else if (num == null) {
+	} else if (num === null) {
 		account_signinHTML.style.visibility = 'visible';
 		account_signinHTML.style.opacity = 1;
 		account_signupHTML.style.visibility = 'hidden';
@@ -166,7 +166,7 @@ async function AccValidation(num) {
 	}
 	
 	// SIGN-UP
-	if (num == 0) {
+	if (num === 0) {
 
 		// get account data from the database
 		await getAcc();
@@ -252,7 +252,7 @@ async function AccValidation(num) {
 	}
 
 	// SIGN-IN / LOG-IN
-	else if(num == 1) {
+	else if(num === 1) {
 
 		// get account data from the database
 		await getAcc();
@@ -261,8 +261,8 @@ async function AccValidation(num) {
 		for (let a = 0; a < account.length; a++) {
 			
 			// check for validation
-			if (account_name_in.value == account[a].account_name 
-				&& pass_in.value == account[a].password) {
+			if (account_name_in.value === account[a].account_name 
+				&& pass_in.value === account[a].password) {
 
 					account_signinHTML.style.display = 'none';
 					account_signupHTML.style.display = 'none';

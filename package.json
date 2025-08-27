@@ -4,8 +4,9 @@
   "description": "a game with birds",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "build": "node src/server.js"
   },
   "repository": {
     "type": "git",
@@ -24,5 +25,8 @@
   "dependencies": {
     "express": "^4.17.1",
     "nedb": "^1.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
