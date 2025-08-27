@@ -1,6 +1,6 @@
 {
   "name": "birdie-jump",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "a game with birds",
   "main": "server.js",
   "scripts": {
@@ -24,6 +24,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "express-history-api-fallback": "^2.2.1",
+    "fallback": "^1.0.1",
     "nedb": "^1.8.0"
   },
   "devDependencies": {
