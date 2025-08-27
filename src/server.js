@@ -11,7 +11,7 @@ database.loadDatabase();
 database2.loadDatabase();
 acc.loadDatabase();
 
-server.listen(port, () => { console.log('listening at port: ' + port) });
+server.listen(port, () => { console.log('listening on port: ' + port) });
 app.use(express.json({ limit: '1mb' }));
 
 app.post('/score/', function (request, response) {
