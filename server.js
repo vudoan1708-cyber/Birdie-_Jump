@@ -22,7 +22,7 @@ const server = http.createServer(app);
 server.listen(port, () => { console.log(`listening on port: ${port}`) });
 app.use(express.json({ limit: '1mb' }));
 
-app.post('/score', function (request, response) {
+app.post('/api/score', function (request, response) {
 
     const data = request.body;
 
@@ -30,7 +30,7 @@ app.post('/score', function (request, response) {
     response.json(data);
 });
 
-app.get('/score', function (request, response) {
+app.get('/api/score', function (request, response) {
     database.find({}).sort({ score: -1 }).exec((err, data) => {
         if (err) {
             console.error(err);
@@ -40,7 +40,7 @@ app.get('/score', function (request, response) {
     });
 });
 
-app.post('/score2', function (request, response) {
+app.post('/api/score2', function (request, response) {
 
     const data = request.body;
 
@@ -48,7 +48,7 @@ app.post('/score2', function (request, response) {
     response.json(data);
 });
 
-app.get('/score2', function (request, response) {
+app.get('/api/score2', function (request, response) {
     database2.find({}).sort({ time: -1 }).exec((err, data) => {
         if (err) {
             console.error(err);
@@ -58,14 +58,14 @@ app.get('/score2', function (request, response) {
     });
 });
 
-app.post('/acc', function(request, response) {
+app.post('/api/acc', function(request, response) {
     const data = request.body;
 
     acc.insert(data);
     response.json(data);
 });
 
-app.get('/acc', function(request, response) {
+app.get('/api/acc', function(request, response) {
     acc.find({}).exec((err, data) => {
         if (err) {
             console.error(err);
