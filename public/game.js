@@ -118,16 +118,14 @@ const accAvailable = document.getElementsByTagName('p');
 
 // get the highest score from the database
 async function getHighestScore() {
-	const response = await fetch('/api/get/score');
+	const [response, response2] = await Promise.all([fetch('/api/score'), fetch('/api/score2')]);
 	highestScore = await response.json();
-
-	const response2 = await fetch('/api/get/score2');
 	highestScore2 = await response2.json();
 	return highestScore, highestScore2;
 }
 
 async function getAcc() {
-	const response = await fetch('/api/get/acc');
+	const response = await fetch('/api/acc');
 	account = await response.json();
 	return account;
 }
@@ -141,12 +139,47 @@ function mediaLoader() {
 	}
 }
 
+let account_signinHTML = null,
+	account_signupHTML = null,
+	signInChecked = null;
+async function signupAccount() {
+	// create a data object with account and password data
+	const data = {
+		account_name: account_name_up.value,
+		password: pass_up.value
+	}
+
+	// create option 
+	const options = {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(data)
+	};
+
+	// create a response to an endpoint 
+	const response = await fetch('/api/acc', options);
+	await response.json();
+
+	// show the sign-in section and hide the sign-up one
+	account_signinHTML.style.visibility = 'visible';
+	account_signinHTML.style.opacity = 1;
+	account_signupHTML.style.visibility = 'hidden';
+
+	// check if the field is still full with previous account signup
+	if (account_name_up.value != '' 
+	&& pass_up.value != '') {
+		account_name_up.value = '';
+		pass_up.value = '';
+	}
+}
+
 async function AccValidation(num) {
-	
 	// get the input HTML element
-	const account_signinHTML = document.getElementById('account'),
-		account_signupHTML = document.getElementById('signup'),
-		signInChecked = document.getElementById('signInChecked');
+	account_signinHTML = document.getElementById('account');
+	account_signupHTML = document.getElementById('signup');
+	signInChecked = document.getElementById('signInChecked');
 
 	// CHANGING BETWEEN SIGN-IN AND SIGN-UP SCREEN
 	if (num === -1) {
@@ -172,10 +205,14 @@ async function AccValidation(num) {
 		await getAcc();
 
 		// loop through the obtained data
+		if (account.length === 0) {
+			await signupAccount();
+			return;
+		}
 		for (let a = 0; a < account.length; a++) {
 
 			// check if the account has been signed up
-			if (account_name_up.value == account[a].account_name) {
+			if (account_name_up.value == account[a]?.account_name) {
 				
 				if (accAvailable[3].style.visibility == 'visible') {
 					accAvailable[3].style.visibility = 'hidden';
@@ -198,7 +235,7 @@ async function AccValidation(num) {
 			}
 
 			// otherwise
-			else if (account_name_up.value != account[a].account_name) {
+			else if (account_name_up.value != account[a]?.account_name) {
 
 				// check if error handling is still on
 				if (accAvailable[3].style.visibility == 'visible') {
@@ -214,36 +251,7 @@ async function AccValidation(num) {
 				// check if every data is checked
 				if (a == account.length - 1) {
 
-					// create a data object with account and password data
-					const data = {
-						account_name: account_name_up.value,
-						password: pass_up.value
-					}
-
-					// create option 
-					const options = {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify(data)
-					};
-
-					// create a response to an endpoint 
-					const response = await fetch('/api/acc', options);
-					await response.json();
-
-					// show the sign-in section and hide the sign-up one
-					account_signinHTML.style.visibility = 'visible';
-					account_signinHTML.style.opacity = 1;
-					account_signupHTML.style.visibility = 'hidden';
-
-					// check if the field is still full with previous account signup
-					if (account_name_up.value != '' 
-					&& pass_up.value != '') {
-						account_name_up.value = '';
-						pass_up.value = '';
-					}
+					await signupAccount();
 
 					break;
 				}
@@ -257,12 +265,16 @@ async function AccValidation(num) {
 		// get account data from the database
 		await getAcc();
 
+		if (account.length === 0) {
+			alert('No accounts found in database, please create one and sign in');
+		}
+
 		// wait for data to be obtained, then loop through it
 		for (let a = 0; a < account.length; a++) {
 			
 			// check for validation
-			if (account_name_in.value === account[a].account_name 
-				&& pass_in.value === account[a].password) {
+			if (account_name_in.value === account[a]?.account_name 
+				&& pass_in.value === account[a]?.password) {
 
 					account_signinHTML.style.display = 'none';
 					account_signupHTML.style.display = 'none';
@@ -981,6 +993,43 @@ function draw() {
 	} else playGame();
 }
 
+async function updateGameScore1() {
+	const data = {
+		account_name,
+		score,
+	};
+
+	// create options
+	const options = {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(data)
+	};
+
+	const response = await fetch('/api/score', options);
+	await response.json();
+}
+async function updateGameScore2() {
+	const data = {
+		account_name,
+		time
+	};
+
+	// create options
+	const options = {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(data)
+	};
+
+	const response = await fetch('/api/score2', options);
+	await response.json();
+}
+
 async function resetGameDisplay() {
 	lost = true;
 
@@ -997,95 +1046,65 @@ async function resetGameDisplay() {
 
 	if (mode == 1) {
 
-		// loop through the obtained score data
-		for (let s = 0; s < highestScore.length; s++) {
-
-			// check for the accounts
-			if (account_name == highestScore[s].account_name) {
-
-				push();
-					textSize(width / 40);
-					text("Highest Score is : " + highestScore[s].score, width / 2, height / 2 - 180 + d / 1.5);
-				pop();
-
-				// check if there is data from the database
-				if (highestScore != undefined || highestScore != null) {
-
-					// and if the highest score is less than current score
-					if (highestScore[s].score < score) {
-						
-						// post the data to the database
-						// create a data instance to store data
-						const data = {
-							account_name,
-							pass,
-							score
-						};
-
-						// create options
-						const options = {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify(data)
-						};
-
-						// fetch the endpoint
-						const response = await fetch('/api/score', options);
-						await response.json();
-
-						// change fill color
-						fill(0, 255, 0, 200);
-						break;
-					} else {
-						fill(255, 0, 0, 200);
-						break;
-					}
-				}
-
-			// otherwise, which means this is the first time player
-			} else if (highestScore[s].account_name == undefined ||
-						highestScore[s].account_name == null ||
-						highestScore[s].account_name == '' ||
-						account_name != highestScore[s].account_name) {
-
-				// check if the last data is checked
-				// which means, every datum has been checked
-				// and still, there is no account name matches up with the data
-				if(s == highestScore.length - 1) {
+		if (highestScore.length === 0) {
+			push();
+				textSize(width / 40);
+				text("No Highest Record Yet", width / 2, height / 2 - 180 + d / 1.5);
+			pop();
+			await updateGameScore1();
+		} else {
+			for (const s in highestScore) {
+	
+				// check for the accounts
+				if (account_name === highestScore[s]?.account_name) {
+	
 					push();
 						textSize(width / 40);
-						text("No Highest Record Yet", width / 2, height / 2 - 180 + d / 1.5);
+						text("Highest Score is : " + highestScore[s]?.score, width / 2, height / 2 - 180 + d / 1.5);
 					pop();
-						
-					// no need for checking score from the database
-					// post the data to the database
-					// create a data instance to store data
-					const data = {
-						account_name,
-						pass,
-						score
-					};
-
-					// create options
-					const options = {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify(data)
-					};
-
-					// fetch the endpoint
-					const response = await fetch('/api/score', options);
-					await response.json();
-
-					// change fill color
-					fill(0, 255, 0, 200);
+	
+					// check if there is data from the database
+					if (highestScore != undefined || highestScore != null) {
+	
+						// and if the highest score is less than current score
+						if (highestScore[s]?.score < score) {
+							await updateGameScore1();
+	
+							// change fill color
+							fill(0, 255, 0, 200);
+							break;
+						} else {
+							fill(255, 0, 0, 200);
+							break;
+						}
+					}
+	
+				// otherwise, which means this is the first time player
+				} else if (highestScore[s].account_name === undefined ||
+							highestScore[s].account_name === null ||
+							highestScore[s].account_name === '' ||
+							account_name !== highestScore[s].account_name) {
+	
+					// check if the last data is checked
+					// which means, every datum has been checked
+					// and still, there is no account name matches up with the data
+					if(s == highestScore.length - 1) {
+						push();
+							textSize(width / 40);
+							text("No Highest Record Yet", width / 2, height / 2 - 180 + d / 1.5);
+						pop();
+							
+						// no need for checking score from the database
+						// post the data to the database
+						// create a data instance to store data
+						await updateGameScore1();
+	
+						// change fill color
+						fill(0, 255, 0, 200);
+					}
 				}
-			}
-		} 
+			} 
+		}
 
 		text("Your Score is: " + score, width / 2, height / 2 - 125 + d / 1.5);
 
@@ -1102,92 +1121,59 @@ async function resetGameDisplay() {
 	} else if (mode == 2) {
 		if (time > 1) {
 
-			// loop through the obtained score data
-			for (let s = 0; s < highestScore2.length; s++) {
-
-				// check for the accounts
-				if (account_name == highestScore2[s].account_name) {
-
-					push();
-						textSize(width / 40);
-						text("Highest Score is : " + highestScore2[s].time + " seconds", width / 2, height / 2 - 180 + d / 1.5);
-					pop();
-
-					// check if there is data from the database
-					if (highestScore2 != undefined || highestScore2 != null) {
-
-						// and if the highest score is less than current score
-						if (highestScore2[s].time < time) {
-							
-							// post the data to the database
-							// create a data instance to store data
-							const data = {
-								account_name,
-								pass,
-								time
-							};
-
-							// create options
-							const options = {
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json'
-								},
-								body: JSON.stringify(data)
-							};
-
-							// fetch the endpoint
-							const response = await fetch('/api/score2', options);
-							await response.json();
-
-							// change fill color
-							fill(0, 255, 0, 200);
-							break;
-						} else {
-							fill(255, 0, 0, 200);
-							break;
-						}
-					}
-
-				// otherwise, which means this is the first time player
-				} else if (highestScore2[s].account_name == undefined ||
-							highestScore2[s].account_name == null ||
-							highestScore2[s].account_name == '' ||
-							account_name != highestScore2[s].account_name) {
-
-					// check if the last data is checked
-					// which means, every datum has been checked
-					// and still, there is no account name matches up with the data
-					if(s == highestScore2.length - 1) {
+			if (highestScore2.length === 0) {
+				push();
+					textSize(width / 40);
+					text("No Highest Record Yet", width / 2, height / 2 - 180 + d / 1.5);
+				pop();
+				await updateGameScore2();
+			} else {
+				for (const s in highestScore2) {
+	
+					// check for the accounts
+					if (account_name == highestScore2[s].account_name) {
+	
 						push();
 							textSize(width / 40);
-							text("No Highest Record Yet", width / 2, height / 2 - 180 + d / 1.5);
+							text("Highest Score is : " + highestScore2[s].time + " seconds", width / 2, height / 2 - 180 + d / 1.5);
 						pop();
-							
-						// no need for checking score from the database
-						// post the data to the database
-						// create a data instance to store data
-						const data = {
-							account_name,
-							pass,
-							time
-						};
-
-						// create options
-						const options = {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify(data)
-						};
-
-						// fetch the endpoint
-						const response = await fetch('/api/score2', options);
-						await response.json();
-
-						// change fill color
-						fill(0, 255, 0, 200);
+	
+						// check if there is data from the database
+						if (highestScore2 != undefined || highestScore2 != null) {
+	
+							// and if the highest score is less than current score
+							if (highestScore2[s].time < time) {
+								await updateGameScore2();
+	
+								// change fill color
+								fill(0, 255, 0, 200);
+								break;
+							} else {
+								fill(255, 0, 0, 200);
+								break;
+							}
+						}
+	
+					// otherwise, which means this is the first time player
+					} else if (highestScore2[s].account_name == undefined ||
+								highestScore2[s].account_name == null ||
+								highestScore2[s].account_name == '' ||
+								account_name != highestScore2[s].account_name) {
+	
+						// check if the last data is checked
+						// which means, every datum has been checked
+						// and still, there is no account name matches up with the data
+						if(s == highestScore2.length - 1) {
+							push();
+								textSize(width / 40);
+								text("No Highest Record Yet", width / 2, height / 2 - 180 + d / 1.5);
+							pop();
+								
+							await updateGameScore2();
+	
+							// change fill color
+							fill(0, 255, 0, 200);
+						}
 					}
 				}
 			}
