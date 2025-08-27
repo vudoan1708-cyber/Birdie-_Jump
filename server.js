@@ -13,7 +13,7 @@ database.loadDatabase();
 database2.loadDatabase();
 acc.loadDatabase();
 
-const root = path.join(__dirname, '../public');
+const root = path.join(__dirname, './public');
 const port = process.env.PORT || 5000;
 
 const app = express();
