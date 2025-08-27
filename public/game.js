@@ -118,16 +118,16 @@ const accAvailable = document.getElementsByTagName('p');
 
 // get the highest score from the database
 async function getHighestScore() {
-	const response = await fetch('/score');
+	const response = await fetch('/data/score');
 	highestScore = await response.json();
 
-	const response2 = await fetch('/score2');
+	const response2 = await fetch('/data/score2');
 	highestScore2 = await response2.json();
 	return highestScore, highestScore2;
 }
 
 async function getAcc() {
-	const response = await fetch('/acc');
+	const response = await fetch('/data/acc');
 	account = await response.json();
 	return account;
 }
@@ -230,7 +230,7 @@ async function AccValidation(num) {
 					};
 
 					// create a response to an endpoint 
-					const response = await fetch('/acc', options);
+					const response = await fetch('/data/acc', options);
 					await response.json();
 
 					// show the sign-in section and hide the sign-up one
@@ -1032,7 +1032,7 @@ async function resetGameDisplay() {
 						};
 
 						// fetch the endpoint
-						const response = await fetch('/score', options);
+						const response = await fetch('/data/score', options);
 						await response.json();
 
 						// change fill color
@@ -1078,7 +1078,7 @@ async function resetGameDisplay() {
 					};
 
 					// fetch the endpoint
-					const response = await fetch('/score', options);
+					const response = await fetch('/data/score', options);
 					await response.json();
 
 					// change fill color
@@ -1137,7 +1137,7 @@ async function resetGameDisplay() {
 							};
 
 							// fetch the endpoint
-							const response = await fetch('/score2', options);
+							const response = await fetch('/data/score2', options);
 							await response.json();
 
 							// change fill color
@@ -1183,7 +1183,7 @@ async function resetGameDisplay() {
 						};
 
 						// fetch the endpoint
-						const response = await fetch('/score2', options);
+						const response = await fetch('/data/score2', options);
 						await response.json();
 
 						// change fill color
