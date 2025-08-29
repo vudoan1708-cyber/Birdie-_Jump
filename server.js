@@ -24,7 +24,7 @@ app.post('/api/score', async function (request, response) {
     const found = await score1_db.find({ account_name: data.account_name });
 
     if (found?.length === 0) {
-        score1_db.insert(data);
+        await score1_db.insert(data);
         response.json(data);
         return;
     }
@@ -47,7 +47,7 @@ app.post('/api/score2', async function (request, response) {
     const found = await score2_db.find({ account_name: data.account_name });
 
     if (found?.length === 0) {
-        score2_db.insert(data);
+        await score2_db.insert(data);
         response.json(data);
         return;
     }
@@ -65,14 +65,14 @@ app.get('/api/score2', async function (_, response) {
     }
 });
 
-app.post('/api/acc', function(request, response) {
+app.post('/api/acc', async function (request, response) {
     const data = request.body;
 
-    accounts_db.insert(data);
+    await accounts_db.insert(data);
     response.json(data);
 });
 
-app.get('/api/acc', async function(_, response) {
+app.get('/api/acc', async function (_, response) {
     try {
         const data = await accounts_db.find({});
         response.json(data)
