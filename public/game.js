@@ -445,7 +445,6 @@ function handleData(num, modeChanged) {
 		playGame();
 	}
 	
-	// console.log(players, scores);
 	displayLeaderboard1(players, scores, num);
 }
 
@@ -615,9 +614,11 @@ function setup() {
 	grid = create2DArray(cols_mode3, rows_mode3);
 	for (let i = 0; i < grid.length; i++) {
 		for (let j = 0; j < grid[i].length; j++) {
-			grid[i][j] = new Number(i, j, w, h);
+			grid[i][j] = new Cell(i, j, w, h);
 		}
 	}
+
+	givenNum.assignNewNumber(grid);
 }
 
 //game function
@@ -1332,7 +1333,6 @@ function displayBonus() {
 		//remove a bonus when it gets collected
 		if (bonus[b].collected(birdie2)) {
 			bonus.splice(b, 1);
-			// console.log("COLLECTED");
 			birdie2.jumpForwards();
 			forwards.play();
 		}
@@ -1407,7 +1407,6 @@ function displayBonus_Mode1() {
 			if (countUp < 200) {
 				return true;
 
-				// console.log("CountUp: " + countUp);
 			} else {
 				return false;
 			}
@@ -1450,7 +1449,6 @@ function displayBonus_Mode1() {
 function drawFloors() {
 	if (frameCount % 80 == 0 || frameCount % 100 == 0) { //for every 80, 160, 320 frame,...
 		floors.push(new Floors()); //push new planes into array through a class callback
-		// console.log(floors);		
 	}
 
 	if (time > 29) {
@@ -1518,15 +1516,29 @@ function display2() {
 }
 
 //mode 3
-function repositionArrayItemsBackwards(gridColumnItems) {
+function animateRepositioningOfCells(gridColumnItems) {
 	for (let j = 0; j < gridColumnItems.length; j++) {
 		if (!gridColumnItems[j] || gridColumnItems?.[j]?.softDeleted) {
 			gridColumnItems[j] = undefined;
-			break;
+			continue;
 		}
 		const temp = structuredClone(gridColumnItems[j + 1]);
 		gridColumnItems[j].updateCellY(temp);
 	}
+
+	return gridColumnItems;
+}
+function repositionArrayItemsBackwards(gridColumnItems) {
+	const undefinedItems = gridColumnItems.filter((row) => !row);
+	const undefinedItemPosition = undefinedItems.length - 1;
+	for (let j = gridColumnItems.length - 1; j >= 0; j--) {
+		if (j === undefinedItemPosition) {
+			gridColumnItems[j] = undefined;
+			break;
+		}
+		gridColumnItems[j] = gridColumnItems[j - 1];
+	}
+
 	return gridColumnItems;
 }
 
@@ -1554,12 +1566,11 @@ function drawBoard() {
 						// }
 						grid[i][j].softDeleted = true;
 
+						grid[i] = animateRepositioningOfCells(grid[i]);
 						grid[i] = repositionArrayItemsBackwards(grid[i]);
-						console.log('after repositioning', grid[i]);
 						selectedNumbers = [];
-						// grid[i][j].getDeleted();
-						// grid[i][j].number = [int(random(1, 10))]; // re-make a new number 
-						givenNum.arbitNum = int(random(1, 10)); // number change whenever a cell is correctly hit
+
+						givenNum.assignNewNumber(grid);
 						hitOnce = true;
 					}
 

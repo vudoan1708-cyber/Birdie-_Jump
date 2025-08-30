@@ -1,4 +1,4 @@
-class Number {
+class Cell {
     constructor(i, j, w, h) {
         this.i = i;
         this.j = j;
@@ -145,7 +145,64 @@ class GivenNum {
     constructor() {
         this.x = width / 2;
         this.y = d;
+        this.operators = ['+', '-', '*', '/'];
         this.arbitNum = int(random(1, 10));
+    }
+
+    // Fisher-Yates shuffle to randomise digits
+    shuffle(array) {
+        let arr = array.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    generateMathExpression(items) {
+        const shuffledDigits = this.shuffle(items);
+        // Random subset length: from 1 up to all digits
+        const subsetLength = Math.floor(Math.random() * shuffledDigits.length) + 1;
+        const chosenDigits = shuffledDigits.slice(0, subsetLength);
+
+        let expr = `${chosenDigits[0]}`;
+
+        for (let i = 1; i < chosenDigits.length; i++) {
+            let op;
+            let nextDigit = chosenDigits[i];
+
+            // Try to pick an operator that won't produce a fraction
+            const validOps = this.operators.filter(o => {
+            if (o === '/') {
+                return nextDigit !== 0 && expr && math.evaluate(expr) % nextDigit === 0;
+            }
+            return true;
+            });
+
+            // Fallback to + if no valid operator
+            op = validOps.length > 0 
+            ? validOps[Math.floor(Math.random() * validOps.length)] 
+            : '+';
+
+            expr += op + nextDigit;
+        }
+        console.log('expr', expr);
+        return expr;
+    }
+
+    assignNewNumber(grid) {
+        const lastRowItems = [];
+        for (let i = 0; i < grid.length; i ++) {
+            if (!grid[i][rows_mode3 - 1]) continue;
+            lastRowItems.push(grid[i][rows_mode3 - 1].number);
+        }
+        const expression = this.generateMathExpression(lastRowItems);
+        try {
+            const result = math.evaluate(expression);
+            this.arbitNum = result ?? lastRowItems[Math.floor(Math.random() * lastRowItems.length)];
+        } catch (err) {
+            console.error('Invalid expression, likely due to division by zero: ', expression);
+        }
+
     }
 
     show() {
