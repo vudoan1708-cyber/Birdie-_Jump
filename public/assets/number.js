@@ -3,10 +3,22 @@ class Number {
         this.i = i;
         this.j = j;
         this.x = i * w;
-        this.y = j + rows_mode3 * 4;
+        this.y = (j * h) + (h * rows_mode3);
         this.w = w;
         this.h = h;
-        this.numbers = [int(random(1, 10))];
+        this.number = int(random(1, 10));
+        this.softDeleted = false;
+        this.rafId = 0;
+    }
+
+    updateCellY(newCell) {
+        this.y += 1;
+
+        if (this.y !== newCell.y) {
+            this.rafId = requestAnimationFrame(() => { this.updateCellY(newCell); });
+        } else {
+            cancelAnimationFrame(this.rafId);
+        }
     }
 
     show() {
@@ -18,7 +30,7 @@ class Number {
             textSize(50);
             textFont("Georgia");
             fill(0);
-            text(this.numbers, this.x + this.w / 2, this.y + this.h / 2 + 10);
+            text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
             pop();
         }
         else {
@@ -29,34 +41,33 @@ class Number {
             textSize(50);
             textFont("Georgia");
             fill(0);
-            text(this.numbers, this.x + this.w / 2, this.y + this.h / 2 + 10);
+            text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
             pop();
         }
     }
 
     showHitWrong() {
         push();
-            fill(255, 0, 0);
-            rect(this.x, this.y, this.w, this.h);
-            textAlign(CENTER);
-            textSize(50);
-            textFont("Georgia");
-            fill(0);
-            text(this.numbers, this.x + this.w / 2, this.y + this.h / 2 + 10);
-            pop();
+        fill(255, 0, 0);
+        rect(this.x, this.y, this.w, this.h);
+        textAlign(CENTER);
+        textSize(50);
+        textFont("Georgia");
+        fill(0);
+        text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
+        pop();
     }
 
     showHit() {
-        
-            push();
-            fill(0, 255, 0);
-            rect(this.x, this.y, this.w, this.h);
-            textAlign(CENTER);
-            textSize(50);
-            textFont("Georgia");
-            fill(0);
-            text(this.numbers, this.x + this.w / 2, this.y + this.h / 2 + 10);
-            pop();
+        push();
+        fill(0, 255, 0);
+        rect(this.x, this.y, this.w, this.h);
+        textAlign(CENTER);
+        textSize(50);
+        textFont("Georgia");
+        fill(0);
+        text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
+        pop();
         
     }
 
@@ -72,53 +83,40 @@ class Number {
         return false;
     }
 
-    getDeleted() {
-        for (let i = this.numbers.length - 1; i >= 0; i--) {
-            this.numbers.splice(i, 1);
-        }
-    }
-
     getAddedUp() {
      // CASE 2 - 2:
-        //number chosen is less than
-        //add up till it gets equal
-            for (let i = 0; i < cols_mode3; i++) {
-                for (let n = 0; n < this.numbers.length; n++) {
-                    currentTotal = grid[i][150].numbers[n];
-                    // a SUM of numbers is larger
-                    if (currentTotal > givenNum.arbitNum) {
+        // a SUM of number is larger
+        if (currentTotal > givenNum.arbitNum) {
+            currentTotal = 0;
+        }
+        //a SUM of number is less than
+        else if (currentTotal < givenNum.arbitNum) {
+            let remainder = givenNum.arbitNum - currentTotal;
+            // for (let j = 0; j < rows_mode3 * 4; j += 50) {
+                // if (birdie3.jump()) {
+                    if (jumpTime > 3) {
+                        jumpTime = 0;
                         currentTotal = 0;
                     }
-                    //a SUM of numbers is less than
-                    else if (currentTotal < givenNum.arbitNum) {
-                        let remainder = givenNum.arbitNum - currentTotal;
-                        // for (let j = 0; j < rows_mode3 * 4; j += 50) {
-                            // if (birdie3.jump()) {
-                                if (jumpTime > 3) {
-                                    jumpTime = 0;
-                                    currentTotal = 0;
-                                }
-                                    // console.log("NEED MORE: " + remainder);
-                                    // console.log("CURRENT: " + currentTotal);
-                                    // return remainder;
-                                
-                                // if (currentTotal == grid[i][150].numbers[n]) {
-                                //     // let addUpRemainder 
-                                    
-                                // }
-                            // }
-                        // }    
+                        // console.log("NEED MORE: " + remainder);
+                        // console.log("CURRENT: " + currentTotal);
+                        // return remainder;
+                    
+                    // if (currentTotal == grid[i][150].number[n]) {
+                    //     // let addUpRemainder 
                         
-                    }
-                    // else {
-                    //     this.numbers = [int(random(1, 10))]; // re-make a new number 
-                    //     givenNum.arbitNum = int(random(1, 10)); // numbers change whenever a cell is correctly hit
-                    //     this.showHit();
-        
-                    //     // return true;
                     // }
-                }
-            }
+                // }
+            // }    
+            
+        }
+        // else {
+        //     this.number = [int(random(1, 10))]; // re-make a new number 
+        //     givenNum.arbitNum = int(random(1, 10)); // number change whenever a cell is correctly hit
+        //     this.showHit();
+
+        //     // return true;
+        // }
        
         // this.numStored = false;
 
@@ -126,11 +124,11 @@ class Number {
         //     for (let j = 0; j < 4; j++) { // check every rows
         //         let eachCellCoord = grid[this.i + i][this.j +j]; // check every cell's coordinate
         //         // console.log(givenNum.arbitNum);
-        //         for (let n = 0; n < this.numbers.length; n++) {
+        //         for (let n = 0; n < this.number.length; n++) {
 
         //             // if each cell that has a number which its sum with another number in the array equals to a given num
-        //             if (givenNum.arbitNum == eachCellCoord.numbers[n] + this.numbers[n + 1]) {
-        //                 console.log(this.numbers[n + 1]);
+        //             if (givenNum.arbitNum == eachCellCoord.number[n] + this.number[n + 1]) {
+        //                 console.log(this.number[n + 1]);
         //                 console.log(eachCellCoord[j]);
         //                 console.log("CORRECT");
         //                 return true;
@@ -157,5 +155,6 @@ class GivenNum {
         textFont("Georgia");
         textSize(40);
         text(this.arbitNum, this.x, this.y);
+        pop();
     }
 }

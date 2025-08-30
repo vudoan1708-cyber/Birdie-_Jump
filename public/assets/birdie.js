@@ -127,25 +127,15 @@ class Birdie3 {
 	moveY() {
 		this.y_pos3 += this.y_speed;
 		this.y_speed += this.gravity;
-		this.y_pos3 = constrain(this.y_pos3, 50, height - this.size_3);
+		this.y_pos3 = constrain(this.y_pos3, height - this.size_3 - this.y_pos3, height - this.size_3);
 	}
 
 	show() {
-		if (!imgReverse) {
+		if (this.dx > 0) {
 			image(birdImg4, this.x_pos3, this.y_pos3, this.size_3, this.size_3);
-			imgReverse = true;
-		}
-		if (this.x_pos3 < 0) {
-			if (imgReverse) {
-				scale(-1, 1);
-				image(birdImg4, -(this.x_pos3 + this.size_3), this.y_pos3, this.size_3, this.size_3);
-				
-			}
-		}
-		else if (this.x_pos3 + this.size_3 > width) {
-				imgReverse = false;		}
-		else {
-			image(birdImg4, this.x_pos3, this.y_pos3, this.size_3, this.size_3);
+		} else {
+			scale(-1, 1);
+			image(birdImg4, -(this.x_pos3 + this.size_3), this.y_pos3, this.size_3, this.size_3);
 		}
 	}
 
@@ -154,8 +144,6 @@ class Birdie3 {
 		//check if bird hits two sides of canvas
 		if (this.x_pos3 < 0 || this.x_pos3 + this.size_3 > width) {
 			this.dx *= -1; //reverse its movements
-			// scale(-1, 1);
-			// image(birdImg4, -(this.x_pos3 + this.size_3), this.y_pos3, this.size_3, this.size_3);
 		}
 	}
 }

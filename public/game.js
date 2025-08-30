@@ -76,7 +76,8 @@ let gameOver_VoiceOverbad = [],
 //game mechanism
 let loading = true;
 
-let mode = -1,
+// let mode = -1,
+let mode = 3,
 	score = 0,
 	time = 0,
 	thornSize = 60,
@@ -90,7 +91,6 @@ let touchScreen = false;
 	counterTriggered = false,
 	instructionClose2 = false,
 	instructionClose1 = false,
-	imgReverse = false,
 	Counter_Wall_Up = false,
 	portal_ShowTime = false,
 	WoodGetHit = false,
@@ -510,6 +510,15 @@ function displayLeaderboard1(players, scores, num) {
 	}
 }
 
+//2D array
+function create2DArray(cols_mode3, rows_mode3) {
+	let arr = new Array(cols_mode3);
+	for (let i = 0; i < arr.length; i++) {
+		arr[i] = new Array(rows_mode3);
+	}
+	return arr;
+}
+
 function setup() {
 	createCanvas(1200, 450).parent("canvasHolder");
 	angleMode(DEGREES);
@@ -528,11 +537,11 @@ function setup() {
 
 	//mode 3
 	birdie3 = new Birdie3();
-	// givenNum = new GivenNum();
-	// canon = new drawCanon();
+	givenNum = new GivenNum();
+	canon = new drawCanon();
 	//putting numbers in the board using 2d array
 	cols_mode3 = floor(width / w);
-	rows_mode3 = floor(height / 9);
+	rows_mode3 = 4;
 
 	//images
 	birdImg4 = loadImage("assets/img/bird4.png", mediaLoader);
@@ -543,11 +552,11 @@ function setup() {
 	sunImg = loadImage("assets/img/sun.png", mediaLoader);
 	sun_coolImg = loadImage("assets/img/sun_cool.png", mediaLoader);
 	sun_surprise = loadImage("assets/img/sun_surprise.png", mediaLoader);
-	// canonImg = loadImage("assets/img/canon.png",mediaLoader);
+	canonImg = loadImage("assets/img/canon.png",mediaLoader);
 	brickImg = loadImage("assets/img/brick.png", mediaLoader);
 	portalImg = loadImage("assets/img/portal.png", mediaLoader);
 	portalGamePlayImg = loadImage("assets/img/portalGamePlay.png", mediaLoader);
-	// cloudImg = loadImage("assets/img/cloud.png");
+	cloudImg = loadImage("assets/img/cloud.png");
 	bgImg = loadImage("assets/img/bg1.png", mediaLoader);
 	bgMenuImg = loadImage("assets/img/bg.png", mediaLoader);
 	//mode 2
@@ -594,6 +603,13 @@ function setup() {
 	// okay
 	gameOver_VoiceOverokay[0] = loadSound("assets/sound effects/voice_over/that's kinda nice.mp3", mediaLoader);
 	gameOver_VoiceOverokay[1] = loadSound("assets/sound effects/voice_over/how much I score.mp3", mediaLoader);
+
+	grid = create2DArray(cols_mode3, rows_mode3);
+	for (let i = 0; i < grid.length; i++) {
+		for (let j = 0; j < grid[i].length; j++) {
+			grid[i][j] = new Number(i, j, w, h);
+		}
+	}
 }
 
 //game function
@@ -815,22 +831,21 @@ async function playGame() {
 		}
 
 	} else if (mode == 3) {
-		// background(51);
-		// strokeWeight(2);
-		// givenNum.show(); //number to achieve
-		// drawHealthBar();
-		// line(0, height / 3, width, height / 3); //line to separate teams (0, 150)
-		// line(0, height / 3 - d, width, height / 3 - d); //line for health bar (0, 50)
-		// line(0, height / 3 + d / 2, width, height / 3 + d / 2); //line for health bar (0, 200)
-		// line(0, height - d / 2, width, height - d / 2); //line for bird (0, 400)
-		// canon.show();
+		background(51);
+		strokeWeight(2);
+		givenNum.show(); //number to achieve
+		drawHealthBar();
+		line(0, height / 3, width, height / 3); //line to separate teams (0, 150)
+		line(0, height / 3 - d, width, height / 3 - d); //line for health bar (0, 50)
+		line(0, height / 3 + d / 2, width, height / 3 + d / 2); //line for health bar (0, 200)
+		line(0, height - d / 2, width, height - d / 2); //line for bird (0, 400)
+		canon.show();
 
-		// drawBoard();
+		drawBoard();
 
-		// birdie3.show();
-		// birdie3.moveX();
-		// birdie3.moveY();
-
+		birdie3.show();
+		birdie3.moveX();
+		birdie3.moveY();
 	}
 }
 
@@ -1219,7 +1234,7 @@ function drawPlanes() {
 			bonusMode1.push(new BonusMode1());
 		}
 		if (frameCount % 90 == 0 || frameCount % 150 == 0) { //for every 90, 180, 270 frame, or 150, 300, 450 frame...
-			if (random(1) < .8) { //pick randomly a frame within the regular interval of frames( more probable)
+			if (random(1) < .75) { //pick randomly a frame within the regular interval of frames( more probable)
 				plane.push(new Plane()); //push new planes into array through a class callback
 			}
 		}
@@ -1267,10 +1282,6 @@ function display() {
 				plane[i].vel -= 0.0001;
 			}
 		}
-
-
-
-
 
 
 		//delete one element of the array
@@ -1489,4 +1500,88 @@ function display2() {
 		// instructionClose2 = true;
 		setTimeout(resetGameDisplay, 2200);
 	}
+}
+
+//mode 3
+function repositionArrayItemsBackwards(gridColumnItems) {
+	for (let j = 0; j < gridColumnItems.length; j++) {
+		if (!gridColumnItems[j] || gridColumnItems?.[j]?.softDeleted) {
+			gridColumnItems[j] = undefined;
+			break;
+		}
+		const temp = structuredClone(gridColumnItems[j + 1]);
+		gridColumnItems[j].updateCellY(temp);
+	}
+	return gridColumnItems;
+}
+
+let selectedNumbers = [];
+function drawBoard() {
+	//draw a board
+	//display rects and numbers in accordance to each cell's position
+	for (let i = 0; i < grid.length; i++) {
+		for (let j = 0; j < grid[i].length; j++) {
+			if (!grid?.[i]?.[j]) continue;
+			grid[i][j].show();
+			// if (key == " ") {
+			if (grid[i][j].getHit(birdie3)) { //if bird hits one of the cells
+				selectedNumbers.push(grid[i][j].number);
+
+				// CASE 1: if an INDIVIDUAL number gets hit EQUALS to a given number
+				if (grid[i][j].number === givenNum.arbitNum) {
+					if (!hitOnce) {
+						grid[i][j].showHit(); // turns green when gets hit
+						currentTotal = 0;
+						jumpTime = 0;
+						// if ( mode == 3) {
+						// 	score++;
+						// 	console.log(score);
+						// }
+						grid[i][j].softDeleted = true;
+
+						grid[i] = repositionArrayItemsBackwards(grid[i]);
+						console.log('after repositioning', grid[i]);
+						selectedNumbers = [];
+						// grid[i][j].getDeleted();
+						// grid[i][j].number = [int(random(1, 10))]; // re-make a new number 
+						givenNum.arbitNum = int(random(1, 10)); // number change whenever a cell is correctly hit
+						hitOnce = true;
+					}
+
+				}
+
+				// CASE 2: DIFFERENT
+				// CASE 2 - 1:
+				// an INDIVIDUAL number chosen is LARGER THAN
+				else if (grid[i][j].number > givenNum.arbitNum) {
+					grid[i][j].showHitWrong();
+					selectedNumbers = [];
+					jumpTime = 0;
+				}
+				// CASE 2 - 2: an INDIVIDUAL number chosen is LESS THAN
+				else {
+					grid[i][j].getAddedUp(selectedNumbers);
+				}
+
+			}
+
+		}
+
+	}
+}
+
+function drawHealthBar() {
+	push();
+	fill(255, 0, 0, 150);
+	rect(0, 0, width, height / 3 - d);
+	rect(0, height / 3, width, height / 3 - d);
+	pop();
+
+	push();
+	fill(150, 150);
+	textFont("Georgia");
+	textSize(50);
+	text("100 / 100", width / 2, (height / 3 - d) / 1.25);
+	text("100 / 100", width / 2, (height / 3 + d / 2) / 1.05);
+	pop();
 }
