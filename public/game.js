@@ -132,7 +132,7 @@ async function getAcc() {
 
 function mediaLoader() {
 	loadingElement++;
-	if (loadingElement == (numImg + numSounds)) {
+	if (loadingElement === (numImg + numSounds)) {
 		intro.loop();
 		intro.setVolume(0.5);
 		loadingGame = false;
@@ -519,10 +519,18 @@ function create2DArray(cols_mode3, rows_mode3) {
 	return arr;
 }
 
+let gradientColors = [];
 function setup() {
 	createCanvas(1200, 450).parent("canvasHolder");
 	angleMode(DEGREES);
 	textAlign(CENTER);
+
+	gradientColors = [
+    color(255, 100, 150),
+    color(100, 200, 255),
+    color(150, 255, 100)
+  ];
+
 	birdie = new Birdie(); //call back for Birdie class
 	birdie2 = new Birdie2();
 
@@ -969,43 +977,50 @@ function mousePressed() {
 	}
 }
 
+let barWidth = 800;
+let barHeight = 40;
 function draw() {
 	if (loadingGame) {
 		background(51);
 		push();
 		translate(width / 2, height / 2);
-		let x = 0;
-		let y = 0;
-		let r = 200; // radius	
-		let angle = 360 * loadingElement / (numImg + numSounds); // angle being calculated by the number of media files
-		let mappingAngle = map(angle, 0, 360, 0, 100);
-		let mappingFillR = map(angle, 0, 360, 100, 255);
-		let mappingFillG = map(random(angle), 0, 360, 0, 100);
-		let mappingFillB = map(random(angle), 0, 360, 0, 255);
+
+		// Draw bar background (rounded rectangle)
+		noStroke();
+		fill(50);
+		rectMode(CENTER);
+		rect(0, 0, barWidth, barHeight, 20);
+
+		const segments = 200;
+		const progress = map(loadingElement, 0, numImg + numSounds, 0, 1);
+
+		const halfH = barHeight / 2;
+		const startX = -barWidth / 2 + halfH;
+		const endX = lerp(-barWidth / 2 + halfH, barWidth / 2 - halfH, progress);
+		for (let i = 0; i < segments * progress; i++) {
+			let x = map(i, 0, segments, startX, endX);
+			let inter = map(i, 0, segments, 0, 1);
+			let c = lerpColor(gradientColors[0], gradientColors[1], inter);
+			let c2 = lerpColor(c, gradientColors[2], inter); // smoother blend
+			stroke(c2);
+			strokeWeight(barHeight);
+			line(x, 0, x + barWidth / segments, 0); // single horizontal line
+		}
+
+		// Outline for glow
 		noFill();
-		ellipseMode(CENTER);
-		ellipse(x, y, r * 2);
-		stroke(255);
-		strokeWeight(30);
-		ellipse(x, y, r * 1.75);
-		ellipse(x, y, r * 2.25);
-		stroke(mappingFillR, mappingFillG, mappingFillB);
-		strokeWeight(50);
-		let dx = r * cos(angle);
-		let dy = r * sin(angle);
-
-		beginShape();
-			vertex(x + dx, y + dy);
-		endShape(CLOSE);
-
+		stroke(255, 150);
 		strokeWeight(2);
-		line(x, y, x + dx, y + dy);
+		rect(0, 0, barWidth, barHeight, 20);
+
 		textSize(15);
 		fill(0, 200);
-		text("Loading", x + dx, y + dy);
-		text(int(mappingAngle), x + dx, y + dy + 20);
+		text('Loading', 0, -5);
+		text(int(loadingElement * 100 / (numImg + numSounds)), 0, 15);
 		pop();
-	} else playGame();
+	} else {
+		playGame();
+	}
 }
 
 async function updateGameScore1() {
