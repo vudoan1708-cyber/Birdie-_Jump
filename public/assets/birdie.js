@@ -123,6 +123,9 @@ class Birdie3 {
 	jump() {
 		this.y_speed = -10;
 	}
+	isFlying() {
+		return this.y_pos3 < height - this.size_3;
+	}
 
 	moveY() {
 		this.y_pos3 += this.y_speed;

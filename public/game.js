@@ -86,7 +86,6 @@ let touchScreen = false;
 	hoverPlayed = false,
 	hoverPlayed2 = false,
 	fallSound = false,
-	hitOnce = false,
 	counterTriggered = false,
 	instructionClose2 = false,
 	instructionClose1 = false,
@@ -841,6 +840,7 @@ async function playGame() {
 		givenNum.show(); //number to achieve
 		drawMathOperators();
 		drawHealthBar();
+		drawSelections();
 		line(0, height / 3, width, height / 3); //line to separate teams (0, 150)
 		line(0, height / 3 - d, width, height / 3 - d); //line for health bar (0, 50)
 		line(0, height / 3 + d / 2, width, height / 3 + d / 2); //line for health bar (0, 200)
@@ -970,8 +970,25 @@ function mousePressed() {
 						alert('You need to select a number first');
 						return;
 					}
-					if (!mathOperators.includes(selectedExpressions[selectedExpressions.length - 1])) {
+
+					const lastExpression = selectedExpressions[selectedExpressions.length - 1];
+					if (!mathOperators.includes(lastExpression.selectedOperator)) {
 						selectedOperator = op;
+						selectedExpressions.push({
+							i: null,
+							j: null,
+							selectedOperator,
+						});
+						return;
+					}
+					// Change of mind for a different math operator
+					if (mathOperators.includes(lastExpression.selectedOperator)) {
+						selectedOperator = op;
+						selectedExpressions[selectedExpressions.length - 1] = {
+							i: null,
+							j: null,
+							selectedOperator,
+						}
 					}
 				}
 			}
@@ -1556,6 +1573,34 @@ function repositionArrayItemsBackwards(gridColumnItems) {
 }
 
 let selectedExpressions = [];
+function getTheCurrentExpressionResult() {
+	const current = selectedExpressions.map((selection) => selection?.number ?? selection?.selectedOperator).join('');
+	if (mathOperators.includes(selectedExpressions[selectedExpressions.length - 1]?.selectedOperator)) {
+		return current;
+	}
+	try {
+		return math.evaluate(current);
+	} catch (e) {}
+}
+function whenNumbersEquate(i, j) {
+	grid[i][j].softDeleted = true;
+
+	grid[i] = animateRepositioningOfCells(grid[i]);
+	grid[i] = repositionArrayItemsBackwards(grid[i]);
+	selectedExpressions = [];
+}
+function whenNumbersNotEquate() {
+	const current = getTheCurrentExpressionResult();
+	if (current === givenNum.arbitNum) {
+		const cellsWithNumbers = selectedExpressions.filter((exp) => exp.number);
+		cellsWithNumbers.forEach((cell) => {
+			whenNumbersEquate(cell.i, cell.j);
+		});
+		givenNum.assignNewNumber(grid);
+	} else if (current > givenNum.arbitNum) {
+		selectedExpressions = [];
+	}
+}
 function drawBoard() {
 	//draw a board
 	//display rects and numbers in accordance to each cell's position
@@ -1564,39 +1609,45 @@ function drawBoard() {
 			if (!grid?.[i]?.[j]) continue;
 			grid[i][j].show();
 			// if (key == " ") {
+			if (grid[i][j].numStored && grid[i][j].getHit(birdie3)) continue;
 			if (grid[i][j].getHit(birdie3)) { //if bird hits one of the cells
-				if (!hitOnce) {
-					hitOnce = true;
-					selectedExpressions.push(grid[i][j].number);
+				const lastExpression = selectedExpressions[selectedExpressions.length - 1];
+				const hasOperatorAndNoDuplicate = lastExpression?.selectedOperator && !selectedExpressions.find((exp) => exp.i === i);
+				if (selectedExpressions.length === 0 || hasOperatorAndNoDuplicate) {
+					selectedExpressions.push({
+						i,
+						j,
+						number: grid[i][j].number,
+					});
+				}
+				if (lastExpression?.number) {
+					selectedExpressions[selectedExpressions.length - 1] = {
+						i,
+						j,
+						number: grid[i][j].number,
+					};
+				}
 
-					// CASE 1: if an INDIVIDUAL number gets hit EQUALS to a given number
-					if (grid[i][j].number === givenNum.arbitNum) {
-						grid[i][j].showHit(); // turns green when gets hit
-						// if ( mode == 3) {
-						// 	score++;
-						// 	console.log(score);
-						// }
-						grid[i][j].softDeleted = true;
-
-						grid[i] = animateRepositioningOfCells(grid[i]);
-						grid[i] = repositionArrayItemsBackwards(grid[i]);
-						selectedExpressions = [];
-
-						givenNum.assignNewNumber(grid);
-					}
-					// CASE 2 - 1: an INDIVIDUAL number chosen is LARGER THAN
-					else if (grid[i][j].number > givenNum.arbitNum) {
-						grid[i][j].showHitWrong();
-						selectedExpressions = [];
-					}
-					// CASE 2 - 2: an INDIVIDUAL number chosen is LESS THAN
-					else {
-						if (!mathOperators.includes(selectedExpressions[selectedExpressions.length - 1])) {
-							selectedExpressions.push(selectedOperator);
-						}
-						console.log('selectedExpressions', selectedExpressions);
-						grid[i][j].getAddedUp(selectedExpressions);
-					}
+				// CASE 1: if an INDIVIDUAL number gets hit EQUALS to a given number
+				if (grid[i][j].number === givenNum.arbitNum) {
+					grid[i][j].showHit(); // turns green when gets hit
+					// if ( mode == 3) {
+					// 	score++;
+					// 	console.log(score);
+					// }
+					whenNumbersEquate(i, j);
+					givenNum.assignNewNumber(grid);
+				}
+				// CASE 2 - 1: an INDIVIDUAL number chosen is LARGER THAN
+				else if (grid[i][j].number > givenNum.arbitNum) {
+					grid[i][j].showHitWrong();
+					whenNumbersNotEquate();
+					// selectedExpressions = [];
+				}
+				// CASE 2 - 2: an INDIVIDUAL number chosen is LESS THAN, and is yet included in the selection
+				else {
+					// grid[i][j].getAddedUp(selectedExpressions);
+					whenNumbersNotEquate();
 				}
 			}
 		}
@@ -1640,5 +1691,16 @@ function drawMathOperators() {
 		text(op, rectSize / 2 - (idx * gap), rectSize / 1.5);
 		pop();
 	});
+	pop();
+}
+
+function drawSelections() {
+	push();
+	fill(255, 200);
+	textFont("Georgia");
+	textSize(25);
+	const current = getTheCurrentExpressionResult();
+	translate(width / 2, d / 2);
+	text(current, 0, 0);
 	pop();
 }

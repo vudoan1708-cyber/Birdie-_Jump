@@ -9,6 +9,8 @@ class Cell {
         this.number = int(random(1, 10));
         this.softDeleted = false;
         this.rafId = 0;
+
+        this.hitWrong = false;
     }
 
     updateCellY(newCell) {
@@ -32,10 +34,31 @@ class Cell {
             fill(0);
             text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
             pop();
-        }
-        else {
+        } else {
             push();
             fill(255, 150);
+            rect(this.x, this.y, this.w, this.h);
+            textAlign(CENTER);
+            textSize(50);
+            textFont("Georgia");
+            fill(0);
+            text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
+            pop();
+        }
+
+        if (this.hitWrong) {
+            push();
+            fill(255, 0, 0);
+            rect(this.x, this.y, this.w, this.h);
+            textAlign(CENTER);
+            textSize(50);
+            textFont("Georgia");
+            fill(0);
+            text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
+            pop();
+        } else if (this.hitRight) {
+            push();
+            fill(0, 255, 0);
             rect(this.x, this.y, this.w, this.h);
             textAlign(CENTER);
             textSize(50);
@@ -47,39 +70,28 @@ class Cell {
     }
 
     showHitWrong() {
-        push();
-        fill(255, 0, 0);
-        rect(this.x, this.y, this.w, this.h);
-        textAlign(CENTER);
-        textSize(50);
-        textFont("Georgia");
-        fill(0);
-        text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
-        pop();
+        this.hitWrong = true;
+        this.hitRight = false;
     }
 
     showHit() {
-        push();
-        fill(0, 255, 0);
-        rect(this.x, this.y, this.w, this.h);
-        textAlign(CENTER);
-        textSize(50);
-        textFont("Georgia");
-        fill(0);
-        text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
-        pop();
-        
+        this.hitRight = true;
+        this.hitWrong = false;
     }
 
     getHit(birdie3) {
         if (birdie3.y_pos3 < this.y + this.h) {
             if (birdie3.x_pos3 > this.x && birdie3.x_pos3 + birdie3.size_3 < this.x + this.w) {
                 this.numStored = true;
+                selectedOperator = '';
                 return true;
             }
         }
-        hitOnce = false;
-        this.numStored = false;
+        if (birdie3.isFlying() && this.numStored) {
+            this.numStored = false;
+            this.hitRight = false;
+            this.hitWrong = false;
+        }
         return false;
     }
 
@@ -198,7 +210,7 @@ class GivenNum {
         const expression = this.generateMathExpression(lastRowItems);
         try {
             const result = math.evaluate(expression);
-            this.arbitNum = result ?? lastRowItems[Math.floor(Math.random() * lastRowItems.length)];
+            this.arbitNum = lastRowItems[Math.floor(Math.random() * lastRowItems.length)];
         } catch (err) {
             console.error('Invalid expression, likely due to division by zero: ', expression);
         }
