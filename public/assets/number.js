@@ -24,49 +24,28 @@ class Cell {
     }
 
     show() {
+        push();
+        image(crateImg, this.x, this.y, this.w, this.h);
+        
+        textAlign(CENTER);
+        textSize(50);
         if (!this.numStored) {
-            push();
-            fill(100);
-            rect(this.x, this.y, this.w, this.h);
-            textAlign(CENTER);
-            textSize(50);
-            textFont("Georgia");
-            fill(0);
-            text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
-            pop();
+            stroke(100);
+            fill(0, 150);
         } else {
-            push();
+            stroke(255, 150);
             fill(255, 150);
-            rect(this.x, this.y, this.w, this.h);
-            textAlign(CENTER);
-            textSize(50);
-            textFont("Georgia");
-            fill(0);
-            text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
-            pop();
         }
 
         if (this.hitWrong) {
-            push();
-            fill(255, 0, 0);
-            rect(this.x, this.y, this.w, this.h);
-            textAlign(CENTER);
-            textSize(50);
-            textFont("Georgia");
-            fill(0);
-            text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
-            pop();
+            stroke(255, 0, 0);
+            fill(200, 0, 0);
         } else if (this.hitRight) {
-            push();
-            fill(0, 255, 0);
-            rect(this.x, this.y, this.w, this.h);
-            textAlign(CENTER);
-            textSize(50);
-            textFont("Georgia");
-            fill(0);
-            text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 10);
-            pop();
+            stroke(0, 255, 0);
+            fill(0, 200, 0);
         }
+        text(this.number, this.x + this.w / 2, this.y + this.h / 2 + 20);
+        pop();
     }
 
     showHitWrong() {

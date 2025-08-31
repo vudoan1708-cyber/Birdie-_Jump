@@ -47,7 +47,7 @@ let canonImg;
 let brickImg;
 let portalImg;
 let portalGamePlayImg;
-
+let crateImg;
 
 
 //assets:songs && sounds
@@ -99,7 +99,7 @@ let touchScreen = false;
 	lost = false;
 
 let countUpPortal = 0,
-	numImg = 17,
+	numImg = 18,
 	numSounds = 27,
 	loadingElement = 0;
 
@@ -561,6 +561,7 @@ function setup() {
 	brickImg = loadImage("assets/img/brick.png", mediaLoader);
 	portalImg = loadImage("assets/img/portal.png", mediaLoader);
 	portalGamePlayImg = loadImage("assets/img/portalGamePlay.png", mediaLoader);
+	crateImg = loadImage("assets/img/cartoon-wooden-crate.png", mediaLoader);
 	cloudImg = loadImage("assets/img/cloud.png");
 	bgImg = loadImage("assets/img/bg1.png", mediaLoader);
 	bgMenuImg = loadImage("assets/img/bg.png", mediaLoader);
@@ -619,18 +620,63 @@ function setup() {
 	givenNum.assignNewNumber(grid);
 }
 
+function selectingMathOperation() {
+	[ ...mathOperators, 'Clear' ].forEach((op, idx) => {
+		const leftEdge = width - ((idx + 1) * rectWidth);
+		if (mouseX > leftEdge - (idx * gap) && mouseX < leftEdge + rectWidth - (idx * gap)) {
+			if (mouseY > 0 && mouseY < rectHeight) {
+				if (op === 'Clear') {
+					const cellsWithNumbers = selectedExpressions.filter((exp) => exp.number);
+					cellsWithNumbers.forEach((cell) => {
+						grid[cell.i][cell.j].dehighlight();
+					});
+					selectedOperator = '';
+					selectedExpressions = [];
+					return true;
+				}
+				if (selectedExpressions.length === 0) {
+					alert('You need to select a number first');
+					return true;
+				}
+
+				const lastExpression = selectedExpressions[selectedExpressions.length - 1];
+				if (!mathOperators.includes(lastExpression.selectedOperator)) {
+					selectedOperator = op;
+					selectedExpressions.push({
+						i: null,
+						j: null,
+						selectedOperator,
+					});
+					return true;
+				}
+				// Change of mind for a different math operator
+				if (mathOperators.includes(lastExpression.selectedOperator)) {
+					selectedOperator = op;
+					selectedExpressions[selectedExpressions.length - 1] = {
+						i: null,
+						j: null,
+						selectedOperator,
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	});
+}
+
 //game function
 function keyPressed() {
 	if (!touchScreen) {
 		if (key == " ") {
-			if (mode == 1) {
+			if (mode === 1) {
 				birdie.jump();
 				flap.play();
-			} else if (mode == 2) {
+			} else if (mode === 2) {
 				birdie2.jump();
 				flap.play();
 				jumpTriggered = true;
-			} else if (mode == 3) {
+			} else if (mode === 3) {
 				birdie3.jump();
 				flap.play();
 			}
@@ -685,6 +731,17 @@ function touchStarted() {
 			if (mouseX > 0 && mouseX < width) {
 				if (mouseY > 0 && mouseY < height) {
 					birdie2.jump();
+					flap.play();
+				}
+			}
+		}
+	} else if (mode === 3) {
+		if (touchScreen) {
+			const operationButtonClicked = selectingMathOperation();
+			if (operationButtonClicked) return;
+			if (mouseX > 0 && mouseX < width) {
+				if (mouseY > 0 && mouseY < height) {
+					birdie3.jump();
 					flap.play();
 				}
 			}
@@ -963,46 +1020,7 @@ function mousePressed() {
 			}
 		}
 	} else if (mode === 3) {
-		[ ...mathOperators, 'Clear' ].forEach((op, idx) => {
-			const leftEdge = width - ((idx + 1) * rectWidth);
-			if (mouseX > leftEdge - (idx * gap) && mouseX < leftEdge + rectWidth - (idx * gap)) {
-				if (mouseY > 0 && mouseY < rectHeight) {
-					if (op === 'Clear') {
-						const cellsWithNumbers = selectedExpressions.filter((exp) => exp.number);
-						cellsWithNumbers.forEach((cell) => {
-							grid[cell.i][cell.j].dehighlight();
-						});
-						selectedOperator = '';
-						selectedExpressions = [];
-						return;
-					}
-					if (selectedExpressions.length === 0) {
-						alert('You need to select a number first');
-						return;
-					}
-
-					const lastExpression = selectedExpressions[selectedExpressions.length - 1];
-					if (!mathOperators.includes(lastExpression.selectedOperator)) {
-						selectedOperator = op;
-						selectedExpressions.push({
-							i: null,
-							j: null,
-							selectedOperator,
-						});
-						return;
-					}
-					// Change of mind for a different math operator
-					if (mathOperators.includes(lastExpression.selectedOperator)) {
-						selectedOperator = op;
-						selectedExpressions[selectedExpressions.length - 1] = {
-							i: null,
-							j: null,
-							selectedOperator,
-						}
-					}
-				}
-			}
-		});
+		selectingMathOperation();
 	}
 
 	// restart game
@@ -1584,7 +1602,14 @@ function repositionArrayItemsBackwards(gridColumnItems) {
 
 let selectedExpressions = [];
 function getTheCurrentExpressionResult() {
-	const current = selectedExpressions.map((selection) => selection?.number ?? selection?.selectedOperator).join('');
+	const current = selectedExpressions
+		.map((selection) => selection?.number ?? selection?.selectedOperator)
+		.reduce((accumulator, current) => {
+			if (!mathOperators.includes(current)) {
+				return `(${accumulator}${current})`;
+			}
+			return `${accumulator}${current}`;
+		}, '');
 	if (mathOperators.includes(selectedExpressions[selectedExpressions.length - 1]?.selectedOperator)) {
 		return current;
 	}
@@ -1605,8 +1630,9 @@ function whenNumbersNotEquate() {
 		const cellsWithNumbers = selectedExpressions.filter((exp) => exp.number);
 		cellsWithNumbers.forEach((cell) => {
 			whenNumbersEquate(cell.i, cell.j);
-			grid[cell.i][cell.j].dehighlight();
+			grid[cell.i]?.[cell.j]?.dehighlight();
 		});
+		selectedExpressions = [];
 		givenNum.assignNewNumber(grid);
 	}
 	// else if (current > givenNum.arbitNum) {
@@ -1624,8 +1650,9 @@ function drawBoard() {
 			if (grid[i][j].numStored && grid[i][j].getHit(birdie3)) continue;
 			if (grid[i][j].getHit(birdie3)) {
 				grid.forEach((col, idx) => {
-					if (idx === i) return;
-					col[col.length - 1].dehighlight();
+					if (selectedExpressions.find((exp) => exp.i === idx)) return;
+					if (!col?.[col.length - 1]) return;
+					col[col.length - 1]?.dehighlight();
 				});
 				const lastExpression = selectedExpressions[selectedExpressions.length - 1];
 				const hasOperatorAndNoDuplicate = lastExpression?.selectedOperator && !selectedExpressions.find((exp) => exp.i === i);
@@ -1711,11 +1738,19 @@ function drawMathOperators() {
 
 function drawSelections() {
 	push();
-	fill(255, 200);
 	textFont("Georgia");
 	textSize(25);
+	fill(255, 0, 200, 100);
+	rect(0, height / 3, width, height / 3 - d);
 	const current = getTheCurrentExpressionResult();
-	translate(width / 2, d / 2);
-	text(current, 0, 0);
+	if (!current) {
+		fill(255, 150);
+		translate(width / 2, (height / 2) - d / 2.25);
+		text('Make the bird jump to select a number', 0, 0);
+	} else {
+		fill(255, 200);
+		translate(width / 2, (height / 2) - d / 2.25);
+		text(current, 0, 0);
+	}
 	pop();
 }
