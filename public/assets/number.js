@@ -87,11 +87,11 @@ class Cell {
                 return true;
             }
         }
-        if (birdie3.isFlying() && this.numStored) {
-            this.numStored = false;
-            this.hitRight = false;
-            this.hitWrong = false;
-        }
+        // if (birdie3.isFlying() && this.numStored) {
+        //     this.numStored = false;
+        //     this.hitRight = false;
+        //     this.hitWrong = false;
+        // }
         return false;
     }
 
@@ -210,7 +210,7 @@ class GivenNum {
         const expression = this.generateMathExpression(lastRowItems);
         try {
             const result = math.evaluate(expression);
-            this.arbitNum = lastRowItems[Math.floor(Math.random() * lastRowItems.length)];
+            this.arbitNum = result > 0 ? result : lastRowItems[Math.floor(Math.random() * lastRowItems.length)];
         } catch (err) {
             console.error('Invalid expression, likely due to division by zero: ', expression);
         }
