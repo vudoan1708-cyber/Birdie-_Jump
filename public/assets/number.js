@@ -145,7 +145,6 @@ class GivenNum {
     constructor() {
         this.x = width / 2;
         this.y = d;
-        this.operators = ['+', '-', '*', '/'];
         this.arbitNum = int(random(1, 10));
     }
 
@@ -159,6 +158,13 @@ class GivenNum {
         return arr;
     }
     generateMathExpression(items) {
+        function validDivision(expr, nextDigit) {
+            if (nextDigit === 0) return false;
+            const candidate = `${expr} / ${nextDigit}`;
+            const val = math.evaluate(candidate);
+            return Number.isInteger(val);
+        }
+
         const shuffledDigits = this.shuffle(items);
         // Random subset length: from 1 up to all digits
         const subsetLength = Math.floor(Math.random() * shuffledDigits.length) + 1;
@@ -171,19 +177,13 @@ class GivenNum {
             let nextDigit = chosenDigits[i];
 
             // Try to pick an operator that won't produce a fraction
-            const validOps = this.operators.filter(o => {
-            if (o === '/') {
-                return nextDigit !== 0 && expr && math.evaluate(expr) % nextDigit === 0;
-            }
-            return true;
-            });
+            do {
+                op = mathOperators[Math.floor(Math.random() * mathOperators.length)];
+            } while (
+                op === '/' && !validDivision(expr, nextDigit) // retry until safe
+            );
 
-            // Fallback to + if no valid operator
-            op = validOps.length > 0 
-            ? validOps[Math.floor(Math.random() * validOps.length)] 
-            : '+';
-
-            expr += op + nextDigit;
+            expr = `${expr}${op}${nextDigit}`;
         }
         console.log('expr', expr);
         return expr;

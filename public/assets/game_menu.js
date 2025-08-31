@@ -187,5 +187,4 @@ class Button {
             hoverPlayed2 = false;
         }
     }
-
 }

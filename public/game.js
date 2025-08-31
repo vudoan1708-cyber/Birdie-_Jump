@@ -25,7 +25,6 @@ let rows_mode3;
 let w = 120;
 let h = 50;
 let grid;
-let currentTotal = 0;
 let givenNum;
 
 //assets:img
@@ -101,7 +100,6 @@ let touchScreen = false;
 	lost = false;
 
 let countUpPortal = 0,
-	jumpTime = 0,
 	numImg = 17,
 	numSounds = 27,
 	loadingElement = 0;
@@ -113,6 +111,7 @@ let highestScore = null,
 let account_name,
 	pass;
 
+const	mathOperators = ['+', '-', '*', '/'];
 const accAvailable = document.getElementsByTagName('p');
 
 
@@ -633,10 +632,8 @@ function keyPressed() {
 				flap.play();
 				jumpTriggered = true;
 			} else if (mode == 3) {
-
 				birdie3.jump();
 				flap.play();
-				jumpTime++;
 			}
 		}
 	}
@@ -733,7 +730,6 @@ function instruction() {
 	}
 }
 
-//as soon as all the conditions are satisfied in mousePressed, the game will be executed
 async function playGame() {
 	const leaderboardBtn = document.getElementById('leaderboardBtn');
 
@@ -843,6 +839,7 @@ async function playGame() {
 		background(51);
 		strokeWeight(2);
 		givenNum.show(); //number to achieve
+		drawMathOperators();
 		drawHealthBar();
 		line(0, height / 3, width, height / 3); //line to separate teams (0, 150)
 		line(0, height / 3 - d, width, height / 3 - d); //line for health bar (0, 50)
@@ -933,7 +930,8 @@ async function restartGamePlay() {
 	counterTriggered = false;
 }
 
-//if mouse is clicked on the assigned area, game is ready to play
+const rectSize = d / 2;
+const gap = 8;
 function mousePressed() {
 	if (mode == 0) { //if the game is not playing, click and play the game
 		if (btn.clickedMode1()) {
@@ -949,20 +947,35 @@ function mousePressed() {
 			intro.stop();
 		}
 	}
-	if (mode == 2) {
+	if (mode === 2) {
 		if (btn.clickedCloseInstruction()) {
 			if (instructionTime < 400) {
 				instructionClose2 = true;
 				hover_play_button.play();
 			} 
 		}
-	} else if (mode == 1) {
+	} else if (mode === 1) {
 		if (btn.clickedCloseInstruction()) {
 			if (instructionTime < 150) {
 				instructionClose1 = true;
 				hover_play_button.play();
 			}
 		}
+	} else if (mode === 3) {
+		mathOperators.forEach((op, idx) => {
+			const leftEdge = width - ((idx + 1) * rectSize);
+			if (mouseX > leftEdge - (idx * gap) && mouseX < leftEdge + rectSize - (idx * gap)) {
+				if (mouseY > 0 && mouseY < rectSize) {
+					if (selectedExpressions.length === 0) {
+						alert('You need to select a number first');
+						return;
+					}
+					if (!mathOperators.includes(selectedExpressions[selectedExpressions.length - 1])) {
+						selectedOperator = op;
+					}
+				}
+			}
+		});
 	}
 
 	// restart game
@@ -1542,7 +1555,7 @@ function repositionArrayItemsBackwards(gridColumnItems) {
 	return gridColumnItems;
 }
 
-let selectedNumbers = [];
+let selectedExpressions = [];
 function drawBoard() {
 	//draw a board
 	//display rects and numbers in accordance to each cell's position
@@ -1552,14 +1565,13 @@ function drawBoard() {
 			grid[i][j].show();
 			// if (key == " ") {
 			if (grid[i][j].getHit(birdie3)) { //if bird hits one of the cells
-				selectedNumbers.push(grid[i][j].number);
+				if (!hitOnce) {
+					hitOnce = true;
+					selectedExpressions.push(grid[i][j].number);
 
-				// CASE 1: if an INDIVIDUAL number gets hit EQUALS to a given number
-				if (grid[i][j].number === givenNum.arbitNum) {
-					if (!hitOnce) {
+					// CASE 1: if an INDIVIDUAL number gets hit EQUALS to a given number
+					if (grid[i][j].number === givenNum.arbitNum) {
 						grid[i][j].showHit(); // turns green when gets hit
-						currentTotal = 0;
-						jumpTime = 0;
 						// if ( mode == 3) {
 						// 	score++;
 						// 	console.log(score);
@@ -1568,38 +1580,33 @@ function drawBoard() {
 
 						grid[i] = animateRepositioningOfCells(grid[i]);
 						grid[i] = repositionArrayItemsBackwards(grid[i]);
-						selectedNumbers = [];
+						selectedExpressions = [];
 
 						givenNum.assignNewNumber(grid);
-						hitOnce = true;
 					}
-
+					// CASE 2 - 1: an INDIVIDUAL number chosen is LARGER THAN
+					else if (grid[i][j].number > givenNum.arbitNum) {
+						grid[i][j].showHitWrong();
+						selectedExpressions = [];
+					}
+					// CASE 2 - 2: an INDIVIDUAL number chosen is LESS THAN
+					else {
+						if (!mathOperators.includes(selectedExpressions[selectedExpressions.length - 1])) {
+							selectedExpressions.push(selectedOperator);
+						}
+						console.log('selectedExpressions', selectedExpressions);
+						grid[i][j].getAddedUp(selectedExpressions);
+					}
 				}
-
-				// CASE 2: DIFFERENT
-				// CASE 2 - 1:
-				// an INDIVIDUAL number chosen is LARGER THAN
-				else if (grid[i][j].number > givenNum.arbitNum) {
-					grid[i][j].showHitWrong();
-					selectedNumbers = [];
-					jumpTime = 0;
-				}
-				// CASE 2 - 2: an INDIVIDUAL number chosen is LESS THAN
-				else {
-					grid[i][j].getAddedUp(selectedNumbers);
-				}
-
 			}
-
 		}
-
 	}
 }
 
 function drawHealthBar() {
 	push();
 	fill(255, 0, 0, 150);
-	rect(0, 0, width, height / 3 - d);
+	// rect(0, 0, width, height / 3 - d);
 	rect(0, height / 3, width, height / 3 - d);
 	pop();
 
@@ -1607,7 +1614,31 @@ function drawHealthBar() {
 	fill(150, 150);
 	textFont("Georgia");
 	textSize(50);
-	text("100 / 100", width / 2, (height / 3 - d) / 1.25);
+	// text("100 / 100", width / 2, (height / 3 - d) / 1.25);
 	text("100 / 100", width / 2, (height / 3 + d / 2) / 1.05);
+	pop();
+}
+
+let selectedOperator = '';
+function drawMathOperators() {
+	push();
+	textFont("Georgia");
+	textSize(30);
+	mathOperators.forEach((op, idx) => {
+		push();
+		translate(width - ((idx + 1) * rectSize), 0);
+		// text("100 / 100", width / 2, (height / 3 - d) / 1.25);
+		if (selectedExpressions.length === 0) {
+			fill(50);
+		} else if (op !== selectedOperator) {
+			fill(150);
+		} else {
+			fill(0, 200, 10);
+		}
+		rect(-idx * gap, 0, rectSize, rectSize);
+		fill(255, 200);
+		text(op, rectSize / 2 - (idx * gap), rectSize / 1.5);
+		pop();
+	});
 	pop();
 }
