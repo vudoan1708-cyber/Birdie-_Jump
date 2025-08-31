@@ -968,6 +968,10 @@ function mousePressed() {
 			if (mouseX > leftEdge - (idx * gap) && mouseX < leftEdge + rectWidth - (idx * gap)) {
 				if (mouseY > 0 && mouseY < rectHeight) {
 					if (op === 'Clear') {
+						const cellsWithNumbers = selectedExpressions.filter((exp) => exp.number);
+						cellsWithNumbers.forEach((cell) => {
+							grid[cell.i][cell.j].dehighlight();
+						});
 						selectedOperator = '';
 						selectedExpressions = [];
 						return;
@@ -1601,6 +1605,7 @@ function whenNumbersNotEquate() {
 		const cellsWithNumbers = selectedExpressions.filter((exp) => exp.number);
 		cellsWithNumbers.forEach((cell) => {
 			whenNumbersEquate(cell.i, cell.j);
+			grid[cell.i][cell.j].dehighlight();
 		});
 		givenNum.assignNewNumber(grid);
 	}
@@ -1617,7 +1622,11 @@ function drawBoard() {
 			grid[i][j].show();
 			// if (key == " ") {
 			if (grid[i][j].numStored && grid[i][j].getHit(birdie3)) continue;
-			if (grid[i][j].getHit(birdie3)) { //if bird hits one of the cells
+			if (grid[i][j].getHit(birdie3)) {
+				grid.forEach((col, idx) => {
+					if (idx === i) return;
+					col[col.length - 1].dehighlight();
+				});
 				const lastExpression = selectedExpressions[selectedExpressions.length - 1];
 				const hasOperatorAndNoDuplicate = lastExpression?.selectedOperator && !selectedExpressions.find((exp) => exp.i === i);
 				if (selectedExpressions.length === 0 || hasOperatorAndNoDuplicate) {

@@ -79,6 +79,12 @@ class Cell {
         this.hitWrong = false;
     }
 
+    dehighlight() {
+        this.hitRight = false;
+        this.hitWrong = false;
+        this.numStored = false;
+    }
+
     getHit(birdie3) {
         if (birdie3.y_pos3 < this.y + this.h) {
             if (birdie3.x_pos3 > this.x && birdie3.x_pos3 + birdie3.size_3 < this.x + this.w) {
