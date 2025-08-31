@@ -839,7 +839,7 @@ async function playGame() {
 		strokeWeight(2);
 		givenNum.show(); //number to achieve
 		drawMathOperators();
-		drawHealthBar();
+		// drawHealthBar();
 		drawSelections();
 		line(0, height / 3, width, height / 3); //line to separate teams (0, 150)
 		line(0, height / 3 - d, width, height / 3 - d); //line for health bar (0, 50)
@@ -930,7 +930,8 @@ async function restartGamePlay() {
 	counterTriggered = false;
 }
 
-const rectSize = d / 2;
+const rectWidth = d;
+const rectHeight = d / 2;
 const gap = 8;
 function mousePressed() {
 	if (mode == 0) { //if the game is not playing, click and play the game
@@ -962,10 +963,15 @@ function mousePressed() {
 			}
 		}
 	} else if (mode === 3) {
-		mathOperators.forEach((op, idx) => {
-			const leftEdge = width - ((idx + 1) * rectSize);
-			if (mouseX > leftEdge - (idx * gap) && mouseX < leftEdge + rectSize - (idx * gap)) {
-				if (mouseY > 0 && mouseY < rectSize) {
+		[ ...mathOperators, 'Clear' ].forEach((op, idx) => {
+			const leftEdge = width - ((idx + 1) * rectWidth);
+			if (mouseX > leftEdge - (idx * gap) && mouseX < leftEdge + rectWidth - (idx * gap)) {
+				if (mouseY > 0 && mouseY < rectHeight) {
+					if (op === 'Clear') {
+						selectedOperator = '';
+						selectedExpressions = [];
+						return;
+					}
 					if (selectedExpressions.length === 0) {
 						alert('You need to select a number first');
 						return;
@@ -1597,9 +1603,10 @@ function whenNumbersNotEquate() {
 			whenNumbersEquate(cell.i, cell.j);
 		});
 		givenNum.assignNewNumber(grid);
-	} else if (current > givenNum.arbitNum) {
-		selectedExpressions = [];
 	}
+	// else if (current > givenNum.arbitNum) {
+	// 	selectedExpressions = [];
+	// }
 }
 function drawBoard() {
 	//draw a board
@@ -1642,7 +1649,6 @@ function drawBoard() {
 				else if (grid[i][j].number > givenNum.arbitNum) {
 					grid[i][j].showHitWrong();
 					whenNumbersNotEquate();
-					// selectedExpressions = [];
 				}
 				// CASE 2 - 2: an INDIVIDUAL number chosen is LESS THAN, and is yet included in the selection
 				else {
@@ -1675,9 +1681,9 @@ function drawMathOperators() {
 	push();
 	textFont("Georgia");
 	textSize(30);
-	mathOperators.forEach((op, idx) => {
+	[ ...mathOperators, 'Clear' ].forEach((op, idx) => {
 		push();
-		translate(width - ((idx + 1) * rectSize), 0);
+		translate(width - ((idx + 1) * rectWidth), 0);
 		// text("100 / 100", width / 2, (height / 3 - d) / 1.25);
 		if (selectedExpressions.length === 0) {
 			fill(50);
@@ -1686,9 +1692,9 @@ function drawMathOperators() {
 		} else {
 			fill(0, 200, 10);
 		}
-		rect(-idx * gap, 0, rectSize, rectSize);
+		rect(-idx * gap, 0, rectWidth, rectHeight);
 		fill(255, 200);
-		text(op, rectSize / 2 - (idx * gap), rectSize / 1.5);
+		text(op, rectWidth / 2 - (idx * gap), rectHeight / 1.5);
 		pop();
 	});
 	pop();
