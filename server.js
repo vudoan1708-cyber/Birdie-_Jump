@@ -65,6 +65,18 @@ app.use(express.json({ limit: '1mb' }));
 //     }
 // });
 
+// app.post('/api/score3', async function (request, response) {
+//     const data = request.body;
+//     const found = await score2_db.find({ account_name: data.account_name });
+
+//     if (found?.length === 0) {
+//         await score2_db.insert(data);
+//         response.json(data);
+//         return;
+//     }
+//     await score2_db.update({ account_name: data.account_name }, { $set: data });
+//     
+
 // app.post('/api/acc', async function (request, response) {
 //     const data = request.body;
 

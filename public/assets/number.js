@@ -79,69 +79,12 @@ class Cell {
         // }
         return false;
     }
-
-    getAddedUp() {
-     // CASE 2 - 2:
-        // a SUM of number is larger
-        if (currentTotal > givenNum.arbitNum) {
-            currentTotal = 0;
-        }
-        //a SUM of number is less than
-        else if (currentTotal < givenNum.arbitNum) {
-            let remainder = givenNum.arbitNum - currentTotal;
-            // for (let j = 0; j < rows_mode3 * 4; j += 50) {
-                // if (birdie3.jump()) {
-                    if (jumpTime > 3) {
-                        jumpTime = 0;
-                        currentTotal = 0;
-                    }
-                        // console.log("NEED MORE: " + remainder);
-                        // console.log("CURRENT: " + currentTotal);
-                        // return remainder;
-                    
-                    // if (currentTotal == grid[i][150].number[n]) {
-                    //     // let addUpRemainder 
-                        
-                    // }
-                // }
-            // }    
-            
-        }
-        // else {
-        //     this.number = [int(random(1, 10))]; // re-make a new number 
-        //     givenNum.arbitNum = int(random(1, 10)); // number change whenever a cell is correctly hit
-        //     this.showHit();
-
-        //     // return true;
-        // }
-       
-        // this.numStored = false;
-
-        // for (let i = 0; i < 10; i++) { //check every cols
-        //     for (let j = 0; j < 4; j++) { // check every rows
-        //         let eachCellCoord = grid[this.i + i][this.j +j]; // check every cell's coordinate
-        //         // console.log(givenNum.arbitNum);
-        //         for (let n = 0; n < this.number.length; n++) {
-
-        //             // if each cell that has a number which its sum with another number in the array equals to a given num
-        //             if (givenNum.arbitNum == eachCellCoord.number[n] + this.number[n + 1]) {
-        //                 console.log(this.number[n + 1]);
-        //                 console.log(eachCellCoord[j]);
-        //                 console.log("CORRECT");
-        //                 return true;
-        //             }
-        //             return false;
-
-        //         }
-        //     }
-        // }
-    }
 }
 
 class GivenNum {
     constructor() {
         this.x = width / 2;
-        this.y = d;
+        this.y = d + 10;
         this.arbitNum = int(random(1, 10));
     }
 
@@ -203,8 +146,12 @@ class GivenNum {
     }
 
     show() {
+        if (endGame3()) return;
         push();
         fill(255);
+        rectMode(CENTER);
+        rect(this.x, this.y - 10, d, 50);
+        fill(0);
         textAlign(CENTER);
         textFont("Georgia");
         textSize(40);

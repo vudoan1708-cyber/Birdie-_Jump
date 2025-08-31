@@ -96,7 +96,7 @@ let touchScreen = false;
 	jumpTriggered = false,
 	pushPlane = false,
 	loadingGame = true,
-	lost = false;
+	finished = false;
 
 let countUpPortal = 0,
 	numImg = 18,
@@ -620,11 +620,13 @@ function setup() {
 	givenNum.assignNewNumber(grid);
 }
 
-function selectingMathOperation() {
+function selectingMathOperation({ key }) {
+	let btnClicked = false;
 	[ ...mathOperators, 'Clear' ].forEach((op, idx) => {
+		const matchedKey = op === key || 'Escape' === key;
 		const leftEdge = width - ((idx + 1) * rectWidth);
-		if (mouseX > leftEdge - (idx * gap) && mouseX < leftEdge + rectWidth - (idx * gap)) {
-			if (mouseY > 0 && mouseY < rectHeight) {
+		if (matchedKey || (mouseX > leftEdge - (idx * gap) && mouseX < leftEdge + rectWidth - (idx * gap))) {
+			if (matchedKey || (mouseY > 0 && mouseY < rectHeight)) {
 				if (op === 'Clear') {
 					const cellsWithNumbers = selectedExpressions.filter((exp) => exp.number);
 					cellsWithNumbers.forEach((cell) => {
@@ -632,11 +634,13 @@ function selectingMathOperation() {
 					});
 					selectedOperator = '';
 					selectedExpressions = [];
-					return true;
+					btnClicked = true;
+					return;
 				}
 				if (selectedExpressions.length === 0) {
 					alert('You need to select a number first');
-					return true;
+					btnClicked = true;
+					return;
 				}
 
 				const lastExpression = selectedExpressions[selectedExpressions.length - 1];
@@ -647,7 +651,8 @@ function selectingMathOperation() {
 						j: null,
 						selectedOperator,
 					});
-					return true;
+					btnClicked = true;
+					return;
 				}
 				// Change of mind for a different math operator
 				if (mathOperators.includes(lastExpression.selectedOperator)) {
@@ -657,18 +662,20 @@ function selectingMathOperation() {
 						j: null,
 						selectedOperator,
 					}
-					return true;
+					btnClicked = true;
+					return;
 				}
 			}
 		}
-		return false;
 	});
+
+	return btnClicked;
 }
 
 //game function
 function keyPressed() {
 	if (!touchScreen) {
-		if (key == " ") {
+		if (key === ' ') {
 			if (mode === 1) {
 				birdie.jump();
 				flap.play();
@@ -681,6 +688,8 @@ function keyPressed() {
 				flap.play();
 			}
 		}
+
+		selectingMathOperation({ key });
 	}
 }
 
@@ -737,7 +746,7 @@ function touchStarted() {
 		}
 	} else if (mode === 3) {
 		if (touchScreen) {
-			const operationButtonClicked = selectingMathOperation();
+			const operationButtonClicked = selectingMathOperation({});
 			if (operationButtonClicked) return;
 			if (mouseX > 0 && mouseX < width) {
 				if (mouseY > 0 && mouseY < height) {
@@ -749,7 +758,7 @@ function touchStarted() {
 	}
 
 	// restart game
-	if (lost) {
+	if (finished) {
 		if (touchScreen) {
 			if (mouseX > 0 && mouseX < width) {
 				if (mouseY > 0 && mouseY < height) {
@@ -892,7 +901,8 @@ async function playGame() {
 		}
 
 	} else if (mode == 3) {
-		background(51);
+		// background(51);
+		setGradient(color('#96d8f2ff'), color('#727272ff'));
 		strokeWeight(2);
 		givenNum.show(); //number to achieve
 		drawMathOperators();
@@ -918,7 +928,7 @@ async function restartGamePlay() {
 	// update the highest score
 	await getHighestScore();
 	
-	lost = false;
+	finished = false;
 
 	// mode 1
 	plane.splice(0);
@@ -1020,11 +1030,11 @@ function mousePressed() {
 			}
 		}
 	} else if (mode === 3) {
-		selectingMathOperation();
+		selectingMathOperation({});
 	}
 
 	// restart game
-	if (lost) {
+	if (finished) {
 		if (mouseX > 0 && mouseX < width) {
 			if (mouseY > 0 && mouseY < height) {
 				mode = 0;
@@ -1034,6 +1044,18 @@ function mousePressed() {
 			}
 		}
 	}
+}
+
+function setGradient(c1, c2) {
+	let ctx = drawingContext;              // underlying CanvasRenderingContext2D
+  let grad = ctx.createLinearGradient(0, 0, 0, height);
+  grad.addColorStop(0, c1);
+  grad.addColorStop(1, c2);
+
+  ctx.save();
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, width, height);
+  ctx.restore();
 }
 
 let barWidth = 800;
@@ -1120,7 +1142,7 @@ async function updateGameScore2() {
 }
 
 async function resetGameDisplay() {
-	lost = true;
+	finished = true;
 
 	push();
 	rectMode(CENTER);
@@ -1632,6 +1654,7 @@ function whenNumbersNotEquate() {
 			whenNumbersEquate(cell.i, cell.j);
 			grid[cell.i]?.[cell.j]?.dehighlight();
 		});
+		game_score.play();
 		selectedExpressions = [];
 		givenNum.assignNewNumber(grid);
 	}
@@ -1639,7 +1662,16 @@ function whenNumbersNotEquate() {
 	// 	selectedExpressions = [];
 	// }
 }
+function endGame3() {
+	const allUndefined = grid.every((rowCells) => rowCells[rowCells.length - 1] === undefined);
+	return allUndefined;
+}
 function drawBoard() {
+	if (endGame3()) {
+		noLoop();
+		intro.stop();
+		setTimeout(resetGameDisplay, 1000);
+	}
 	//draw a board
 	//display rects and numbers in accordance to each cell's position
 	for (let i = 0; i < grid.length; i++) {
@@ -1649,11 +1681,6 @@ function drawBoard() {
 			// if (key == " ") {
 			if (grid[i][j].numStored && grid[i][j].getHit(birdie3)) continue;
 			if (grid[i][j].getHit(birdie3)) {
-				grid.forEach((col, idx) => {
-					if (selectedExpressions.find((exp) => exp.i === idx)) return;
-					if (!col?.[col.length - 1]) return;
-					col[col.length - 1]?.dehighlight();
-				});
 				const lastExpression = selectedExpressions[selectedExpressions.length - 1];
 				const hasOperatorAndNoDuplicate = lastExpression?.selectedOperator && !selectedExpressions.find((exp) => exp.i === i);
 				if (selectedExpressions.length === 0 || hasOperatorAndNoDuplicate) {
@@ -1670,10 +1697,17 @@ function drawBoard() {
 						number: grid[i][j].number,
 					};
 				}
+				grid.forEach((col, idx) => {
+					if (selectedExpressions.find((exp) => exp.i === idx)) return;
+					if (!col?.[col.length - 1]) return;
+					col[col.length - 1]?.dehighlight();
+				});
 
 				// CASE 1: if an INDIVIDUAL number gets hit EQUALS to a given number
 				if (grid[i][j].number === givenNum.arbitNum) {
 					grid[i][j].showHit(); // turns green when gets hit
+					game_score.play();
+
 					// if ( mode == 3) {
 					// 	score++;
 					// 	console.log(score);
@@ -1722,11 +1756,16 @@ function drawMathOperators() {
 		translate(width - ((idx + 1) * rectWidth), 0);
 		// text("100 / 100", width / 2, (height / 3 - d) / 1.25);
 		if (selectedExpressions.length === 0) {
-			fill(50);
-		} else if (op !== selectedOperator) {
 			fill(150);
+		} else if (op !== selectedOperator) {
+			fill(color('#FFB347'));
 		} else {
 			fill(0, 200, 10);
+		}
+		if (mouseX > -idx * gap && mouseX < rectWidth) {
+			if (mouseY > 0 && mouseY < rectHeight) {
+				fill(255, 213, 128, 1);
+			}
 		}
 		rect(-idx * gap, 0, rectWidth, rectHeight);
 		fill(255, 200);
@@ -1746,7 +1785,15 @@ function drawSelections() {
 	if (!current) {
 		fill(255, 150);
 		translate(width / 2, (height / 2) - d / 2.25);
-		text('Make the bird jump to select a number', 0, 0);
+		let prgressText = '';
+		if (endGame3()) {
+			textSize(30);
+			fill(255, 200);
+			prgressText = 'Congratulations! You won the game';
+		} else {
+			prgressText = 'Make the bird jump to select a number';
+		}
+		text(prgressText, 0, 2);
 	} else {
 		fill(255, 200);
 		translate(width / 2, (height / 2) - d / 2.25);
