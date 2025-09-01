@@ -100,9 +100,17 @@ class GivenNum {
     generateMathExpression(items) {
         function validDivision(expr, nextDigit) {
             if (nextDigit === 0) return false;
-            const candidate = `${expr} / ${nextDigit}`;
+            const candidate = `(${expr}) / ${nextDigit}`;
             const val = math.evaluate(candidate);
             return Number.isInteger(val);
+        }
+        function tooManySameHardOperators(ops, current) {
+            // [ '*', '/' ]
+            if (mathOperators.slice(2).includes(current)) {
+                const total = ops.filter((op) => op === current);
+                return total.length > 3;
+            }
+            return false;
         }
 
         const shuffledDigits = this.shuffle(items);
@@ -110,20 +118,28 @@ class GivenNum {
         const subsetLength = Math.floor(Math.random() * shuffledDigits.length) + 1;
         const chosenDigits = shuffledDigits.slice(0, subsetLength);
 
+        // let allOps = [];
+
         let expr = `${chosenDigits[0]}`;
 
         for (let i = 1; i < chosenDigits.length; i++) {
             let op;
-            let nextDigit = chosenDigits[i];
+            const nextDigit = chosenDigits[i];
 
+            const beforeRound3 = timePerTries.length < 3;
             // Try to pick an operator that won't produce a fraction
             do {
-                op = mathOperators[Math.floor(Math.random() * mathOperators.length)];
+                const index = Math.floor(Math.random() * (beforeRound3 ? 1 : mathOperators.length));
+                console.log('index', index);
+                op = mathOperators[index];
+                console.log('op', op);
             } while (
                 op === '/' && !validDivision(expr, nextDigit) // retry until safe
             );
 
-            expr = `${expr}${op}${nextDigit}`;
+            // allOps.push(op);
+
+            expr = `(${expr})${op}${nextDigit}`;
         }
         console.log('expr', expr);
         return expr;
@@ -157,5 +173,9 @@ class GivenNum {
         textSize(40);
         text(this.arbitNum, this.x, this.y);
         pop();
+    }
+
+    skip() {
+
     }
 }

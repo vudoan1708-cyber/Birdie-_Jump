@@ -76,8 +76,8 @@ let game3WonSound;
 //game mechanism
 let loading = true;
 
-let mode = -1,
-// let mode = 0,
+// let mode = -1,
+let mode = 0,
 	score = 0,
 	time = 0,
 	thornSize = 60,
@@ -693,7 +693,6 @@ function keyPressed() {
 				flap.play();
 				jumpTriggered = true;
 			} else if (mode === 3) {
-				console.log('jumping');
 				birdie3.jump();
 				flap.play();
 			}
@@ -768,7 +767,7 @@ function touchStarted() {
 			const operationButtonClicked = selectingMathOperation({});
 			if (operationButtonClicked) return;
 			if (mouseX > 0 && mouseX < width) {
-				if (mouseY > 0 && mouseY < height) {
+				if (mouseY > height / 3 && mouseY < height) {
 					birdie3.jump();
 					flap.play();
 				}
@@ -1693,15 +1692,6 @@ function getTheCurrentExpressionResult() {
 	} catch (e) {}
 }
 function whenNumbersEquate(i, j) {
-	timePerTries.push({
-		tries: clearTimes + 1,
-		lastRowCells: grid.map((rowCells) => rowCells[rowCells.length - 1]),
-		time,
-		giveNumber: givenNum.arbitNum,
-	});
-	time = 0;
-	clearTimes = 0;
-
 	grid[i][j].softDeleted = true;
 
 	grid[i] = animateRepositioningOfCells(grid[i]);
@@ -1711,6 +1701,8 @@ function whenNumbersEquate(i, j) {
 function whenNumbersNotEquate() {
 	const current = getTheCurrentExpressionResult();
 	if (current === givenNum.arbitNum) {
+		trackRecordGame3();
+
 		const cellsWithNumbers = selectedExpressions.filter((exp) => exp.number);
 		cellsWithNumbers.forEach((cell) => {
 			whenNumbersEquate(cell.i, cell.j);
@@ -1720,10 +1712,23 @@ function whenNumbersNotEquate() {
 		selectedExpressions = [];
 		givenNum.assignNewNumber(grid);
 	}
-	// else if (current > givenNum.arbitNum) {
-	// 	selectedExpressions = [];
-	// }
 }
+function trackRecordGame3() {
+	timePerTries.push({
+		tries: clearTimes + 1,
+		lastRowCells: grid.map((rowCells) => rowCells[rowCells.length - 1]?.number),
+		selectedExpression: selectedExpressions.map((selection) => {
+			const __selection = { ...selection };
+			delete __selection.j;
+			return __selection;
+		}),
+		time,
+		givenNumber: givenNum.arbitNum,
+	});
+	time = 0;
+	clearTimes = 0;
+}
+
 function endGame3() {
 	const allUndefined = grid.every((rowCells) => rowCells[rowCells.length - 1] === undefined);
 	return allUndefined;
@@ -1782,7 +1787,9 @@ function drawBoard() {
 					// 	score++;
 					// 	console.log(score);
 					// }
+					trackRecordGame3();
 					whenNumbersEquate(i, j);
+
 					givenNum.assignNewNumber(grid);
 				}
 				// CASE 2 - 1: an INDIVIDUAL number chosen is LARGER THAN
@@ -1792,7 +1799,6 @@ function drawBoard() {
 				}
 				// CASE 2 - 2: an INDIVIDUAL number chosen is LESS THAN, and is yet included in the selection
 				else {
-					// grid[i][j].getAddedUp(selectedExpressions);
 					whenNumbersNotEquate();
 				}
 			}
