@@ -76,8 +76,8 @@ let game3WonSound;
 //game mechanism
 let loading = true;
 
-// let mode = -1,
-let mode = 0,
+let mode = -1,
+// let mode = 0,
 	score = 0,
 	time = 0,
 	thornSize = 60,
