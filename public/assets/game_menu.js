@@ -73,23 +73,33 @@ class Button {
         strokeWeight(3);
         rectMode(CENTER);
         fill(255, 0, 0);
-        ellipse(this.x_btn, this.y_btn, this.r_btn, this.r_btn);
+        ellipse(this.x_btn - x_menu / 8, this.y_btn, this.r_btn, this.r_btn);
         fill(0);
         textAlign(CENTER);
         textFont("Georgia");
         textSize(35);
-        text("1", this.x_btn, this.y_btn + 10);
+        text("1", this.x_btn - x_menu / 8, this.y_btn + 10);
         // text("1", this.x_btn, this.y_btn + d);
 
         strokeWeight(3);
         rectMode(CENTER);
         fill(255, 0, 0);
-        ellipse(this.x_btn + 2 * x_menu / 4, this.y_btn, this.r_btn, this.r_btn);
+        ellipse(this.x_btn + x_menu / 4, this.y_btn, this.r_btn, this.r_btn);
         fill(0);
         textAlign(CENTER);
         textFont("Georgia");
         textSize(35);
-        text("2", this.x_btn + 2 * x_menu / 4, this.y_btn + 10);
+        text("2", this.x_btn + x_menu / 4, this.y_btn + 10);
+
+        strokeWeight(3);
+        rectMode(CENTER);
+        fill(255, 0, 0);
+        ellipse(this.x_btn + 2.5 * x_menu / 4, this.y_btn, this.r_btn, this.r_btn);
+        fill(0);
+        textAlign(CENTER);
+        textFont("Georgia");
+        textSize(35);
+        text("3", this.x_btn + 2.5 * x_menu / 4, this.y_btn + 10);
         pop();
     }
     showClose() {
@@ -108,7 +118,7 @@ class Button {
 
     //play button gets clicked with mousePressed function
     clickedMode1() {
-        let d = dist(mouseX, mouseY, this.x_btn, this.y_btn);
+        let d = dist(mouseX, mouseY, this.x_btn - x_menu / 8, this.y_btn);
 
         if (d < this.r_btn / 2) {
             return true;
@@ -116,7 +126,14 @@ class Button {
     }
 
     clickedMode2() {
-        let d1 = dist(mouseX, mouseY, this.x_btn + 2 * x_menu / 4, this.y_btn);
+        let d1 = dist(mouseX, mouseY, this.x_btn + x_menu / 4, this.y_btn);
+        if (d1 < this.r_btn / 2) {
+            return true;
+        } else return false;
+    }
+
+    clickedMode3() {
+        let d1 = dist(mouseX, mouseY, this.x_btn + 2.5 * x_menu / 4, this.y_btn);
         if (d1 < this.r_btn / 2) {
             return true;
         } else return false;
@@ -133,7 +150,8 @@ class Button {
     //play button gets hovered
     //overlay new information for ellipse and text on top the old one
     hovered() {
-        let d = dist(mouseX, mouseY, this.x_btn, this.y_btn); //button to first mode
+        const firstGameXLoc = this.x_btn - x_menu / 8;
+        let d = dist(mouseX, mouseY, firstGameXLoc, this.y_btn);
 
         //mode 1
         if (d < this.r_btn / 2) { //if the button is hovered
@@ -143,26 +161,27 @@ class Button {
             }
             push();
             fill(126, 201, 111);
-            ellipse(this.x_btn, this.y_btn, this.r_btn, this.r_btn);
+            ellipse(firstGameXLoc, this.y_btn, this.r_btn, this.r_btn);
             fill(0);
             textAlign(CENTER);
             textFont("Georgia");
             textSize(35);
-            text("PLAY", this.x_btn, this.y_btn + 10)
+            text("PLAY", firstGameXLoc, this.y_btn + 10)
 
             textSize(20);
-            text("OVER THE PLANES", this.x_btn, this.y_btn - 60);
+            text("OVER THE PLANES", firstGameXLoc, this.y_btn - 60);
             pop();
 
 
         } else { //else if the button is not hovered
-            hover_play_button.stop(); //stop the sound
+            // hover_play_button.stop(); //stop the sound
             hoverPlayed = false;
         }
 
 
         //mode 2
-        let d1 = dist(mouseX, mouseY, this.x_btn + 2 * x_menu / 4, this.y_btn); //button to second mode
+        const secondGameXLoc = this.x_btn + x_menu / 4;
+        let d1 = dist(mouseX, mouseY, secondGameXLoc, this.y_btn);
 
         if (d1 < this.r_btn / 2) { //if the button is hovered
             if (!hoverPlayed2) {
@@ -171,20 +190,47 @@ class Button {
             }
             push();
             fill(126, 201, 111);
-            ellipse(this.x_btn + 2 * x_menu / 4, this.y_btn, this.r_btn, this.r_btn);
+            ellipse(secondGameXLoc, this.y_btn, this.r_btn, this.r_btn);
             fill(0);
             textAlign(CENTER);
             textFont("Georgia");
             textSize(35);
-            text("PLAY", this.x_btn + 2 * x_menu / 4, this.y_btn + 10);
+            text("PLAY", secondGameXLoc, this.y_btn + 10);
 
             textSize(20);
-            text("GAME OF THORNS", this.x_btn + 2 * x_menu / 4, this.y_btn - 60);
+            text("GAME OF THORNS", secondGameXLoc, this.y_btn - 60);
             pop();
 
         } else { //else if the button is not hovered
             hover_play_button2.stop(); //stop the sound
             hoverPlayed2 = false;
+        }
+
+        //mode 3
+        const thirdGameXLoc = this.x_btn + 2.5 * x_menu / 4;
+        let d2 = dist(mouseX, mouseY, thirdGameXLoc, this.y_btn);
+
+        if (d2 < this.r_btn / 2) { //if the button is hovered
+            if (!hoverPlayed3) {
+                hover_play_button.play();
+                hoverPlayed3 = true;
+            }
+            push();
+            fill(126, 201, 111);
+            ellipse(thirdGameXLoc, this.y_btn, this.r_btn, this.r_btn);
+            fill(0);
+            textAlign(CENTER);
+            textFont("Georgia");
+            textSize(35);
+            text("PLAY", thirdGameXLoc, this.y_btn + 10);
+
+            textSize(20);
+            text("BIRDS DO MATHS", thirdGameXLoc, this.y_btn - 60);
+            pop();
+
+        } else { //else if the button is not hovered
+            // hover_play_button.stop(); //stop the sound
+            hoverPlayed3 = false;
         }
     }
 }

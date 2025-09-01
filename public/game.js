@@ -71,20 +71,22 @@ let gameOver_VoiceOverbad = [],
 	gameOver_VoiceOverVerygood = [],
 	gameOver_VoiceOvergood = [],
 	gameOver_VoiceOverokay = [];
+let game3WonSound;
 
 //game mechanism
 let loading = true;
 
-// let mode = -1,
-let mode = 3,
+let mode = -1,
+// let mode = 0,
 	score = 0,
 	time = 0,
 	thornSize = 60,
 	countUp = 0;
 
-let touchScreen = false;
+let touchScreen = false,
 	hoverPlayed = false,
 	hoverPlayed2 = false,
+	hoverPlayed3 = false,
 	fallSound = false,
 	counterTriggered = false,
 	instructionClose2 = false,
@@ -100,7 +102,7 @@ let touchScreen = false;
 
 let countUpPortal = 0,
 	numImg = 18,
-	numSounds = 27,
+	numSounds = 28,
 	loadingElement = 0;
 
 let highestScore = null,
@@ -328,7 +330,7 @@ function handleData(num, modeChanged) {
 	let current_account = null;
 	
 	// check for chosen mode leaderboard
-	if (num == 1) {
+	if (num === 1) {
 
 		// reset the mode 2 button
 		mode2.style.backgroundColor = 'rgb(44, 44, 44)';
@@ -381,7 +383,7 @@ function handleData(num, modeChanged) {
 				}
 			}
 		}
-	} else if (num == 2) {
+	} else if (num === 2) {
 
 		// reset the mode 1 button
 		mode1.style.backgroundColor = 'rgb(44, 44, 44)';
@@ -434,7 +436,7 @@ function handleData(num, modeChanged) {
 				}
 			}
 		}
-	} else if (num == 0) {
+	} else if (num === 0) {
 		leaderboardBtn.childNodes[1].innerHTML = 'LEADERBOARD';
 		modeBtn.style.visibility = 'hidden';
 		backBtn2.style.visibility = 'hidden';
@@ -516,6 +518,17 @@ function create2DArray(cols_mode3, rows_mode3) {
 	return arr;
 }
 
+function game3Setup() {
+	grid = create2DArray(cols_mode3, rows_mode3);
+	for (let i = 0; i < grid.length; i++) {
+		for (let j = 0; j < grid[i].length; j++) {
+			grid[i][j] = new Cell(i, j, w, h);
+		}
+	}
+
+	givenNum.assignNewNumber(grid);
+}
+
 let gradientColors = [];
 function setup() {
 	createCanvas(1200, 450).parent("canvasHolder");
@@ -543,7 +556,7 @@ function setup() {
 	//mode 3
 	birdie3 = new Birdie3();
 	givenNum = new GivenNum();
-	canon = new drawCanon();
+	// canon = new drawCanon();
 	//putting numbers in the board using 2d array
 	cols_mode3 = floor(width / w);
 	rows_mode3 = 4;
@@ -588,6 +601,7 @@ function setup() {
 	brick = loadSound("assets/sound effects/brick.mp3", mediaLoader);
 	hitWood = loadSound("assets/sound effects/hitWood.mp3", mediaLoader);
 	portal_enter = loadSound("assets/sound effects/portal_enter.mp3", mediaLoader);
+	game3WonSound = loadSound("assets/sound effects/game3WonSound.wav", mediaLoader);
 
 	// VOICE OVER
 	// very good
@@ -610,16 +624,10 @@ function setup() {
 	gameOver_VoiceOverokay[0] = loadSound("assets/sound effects/voice_over/that's kinda nice.mp3", mediaLoader);
 	gameOver_VoiceOverokay[1] = loadSound("assets/sound effects/voice_over/how much I score.mp3", mediaLoader);
 
-	grid = create2DArray(cols_mode3, rows_mode3);
-	for (let i = 0; i < grid.length; i++) {
-		for (let j = 0; j < grid[i].length; j++) {
-			grid[i][j] = new Cell(i, j, w, h);
-		}
-	}
-
-	givenNum.assignNewNumber(grid);
+	game3Setup();
 }
 
+let clearTimes = 0;
 function selectingMathOperation({ key }) {
 	let btnClicked = false;
 	[ ...mathOperators, 'Clear' ].forEach((op, idx) => {
@@ -635,6 +643,7 @@ function selectingMathOperation({ key }) {
 					selectedOperator = '';
 					selectedExpressions = [];
 					btnClicked = true;
+					clearTimes++;
 					return;
 				}
 				if (selectedExpressions.length === 0) {
@@ -684,12 +693,15 @@ function keyPressed() {
 				flap.play();
 				jumpTriggered = true;
 			} else if (mode === 3) {
+				console.log('jumping');
 				birdie3.jump();
 				flap.play();
 			}
 		}
 
-		selectingMathOperation({ key });
+		if (mode === 3) {
+			selectingMathOperation({ key });
+		}
 	}
 }
 
@@ -704,6 +716,13 @@ function touchStarted() {
 
 		if (btn.clickedMode2()) {
 			mode = 2;
+			touchScreen = true;
+			play_button_clicked.play();
+			intro.stop();
+		}
+
+		if (btn.clickedMode3()) {
+			mode = 3;
 			touchScreen = true;
 			play_button_clicked.play();
 			intro.stop();
@@ -901,6 +920,11 @@ async function playGame() {
 		}
 
 	} else if (mode == 3) {
+		if (leaderboardBtn.style.opacity == 1) {
+			leaderboardBtn.style.opacity = 0;
+			leaderboardBtn.style.visibility = 'hidden';
+		}
+
 		// background(51);
 		setGradient(color('#96d8f2ff'), color('#727272ff'));
 		strokeWeight(2);
@@ -912,7 +936,6 @@ async function playGame() {
 		line(0, height / 3 - d, width, height / 3 - d); //line for health bar (0, 50)
 		line(0, height / 3 + d / 2, width, height / 3 + d / 2); //line for health bar (0, 200)
 		line(0, height - d / 2, width, height - d / 2); //line for bird (0, 400)
-		canon.show();
 
 		drawBoard();
 
@@ -995,6 +1018,10 @@ async function restartGamePlay() {
 	birdie2.y_pos = 0;
 	birdie2.size = 70;
 	counterTriggered = false;
+
+	// mode 3
+	game3Setup();
+	timePerTries = [];
 }
 
 const rectWidth = d;
@@ -1010,6 +1037,12 @@ function mousePressed() {
 		}
 		if (btn.clickedMode2()) {
 			mode = 2;
+			touchScreen = false;
+			play_button_clicked.play();
+			intro.stop();
+		}
+		if (btn.clickedMode3()) {
+			mode = 3;
 			touchScreen = false;
 			play_button_clicked.play();
 			intro.stop();
@@ -1140,6 +1173,24 @@ async function updateGameScore2() {
 	const response = await fetch('/api/score2', options);
 	await response.json();
 }
+async function updateGameScore3() {
+	const data = {
+		account_name: account_name_up.value,
+		tries: timePerTries,
+	};
+
+	// create options
+	const options = {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(data)
+	};
+
+	const response = await fetch('/api/score3', options);
+	await response.json();
+}
 
 async function resetGameDisplay() {
 	finished = true;
@@ -1155,7 +1206,7 @@ async function resetGameDisplay() {
 	textSize(width / 30);
 	textFont("Georgia");
 
-	if (mode == 1) {
+	if (mode === 1) {
 
 		if (highestScore.length === 0) {
 			push();
@@ -1229,7 +1280,7 @@ async function resetGameDisplay() {
 		} else if (score > 30) {
 			random(gameOver_VoiceOverVerygood).play();
 		}
-	} else if (mode == 2) {
+	} else if (mode === 2) {
 		if (time > 1) {
 
 			if (highestScore2.length === 0) {
@@ -1303,6 +1354,8 @@ async function resetGameDisplay() {
 		} else if (time > 80) {
 			random(gameOver_VoiceOverVerygood).play();
 		}
+	} else if (mode === 3) {
+		await updateGameScore3();
 	}
 	fill(255);
 	text("Press anywhere to restart", width / 2, height / 2 + d / 5);
@@ -1640,6 +1693,15 @@ function getTheCurrentExpressionResult() {
 	} catch (e) {}
 }
 function whenNumbersEquate(i, j) {
+	timePerTries.push({
+		tries: clearTimes + 1,
+		lastRowCells: grid.map((rowCells) => rowCells[rowCells.length - 1]),
+		time,
+		giveNumber: givenNum.arbitNum,
+	});
+	time = 0;
+	clearTimes = 0;
+
 	grid[i][j].softDeleted = true;
 
 	grid[i] = animateRepositioningOfCells(grid[i]);
@@ -1666,11 +1728,19 @@ function endGame3() {
 	const allUndefined = grid.every((rowCells) => rowCells[rowCells.length - 1] === undefined);
 	return allUndefined;
 }
+
+let timePerTries = [];
 function drawBoard() {
 	if (endGame3()) {
 		noLoop();
 		intro.stop();
+		game3WonSound.play();
 		setTimeout(resetGameDisplay, 1000);
+	}
+	if (frameCount % 60 == 0) {
+		// if (instructionClose3) {
+			time++;
+		// }
 	}
 	//draw a board
 	//display rects and numbers in accordance to each cell's position
