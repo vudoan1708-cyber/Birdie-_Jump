@@ -1174,7 +1174,7 @@ async function updateGameScore2() {
 }
 async function updateGameScore3() {
 	const data = {
-		account_name: account_name_up.value,
+		account_name,
 		tries: timePerTries,
 	};
 
