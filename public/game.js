@@ -1379,13 +1379,13 @@ async function resetGameDisplay() {
 			random(gameOver_VoiceOverVerygood).play();
 		}
 	} else if (mode === 3) {
-		await updateGameScore3();
 		push();
 			textSize(width / 40);
 			text("Successful tries are: " + timePerTries.length, width / 2, height / 2 - 180 + d / 1.5);
 		pop();
 		const avgTime = timePerTries.reduce((accumulator, current) => accumulator + current?.time, 0) / timePerTries.length;
 		text("Average time is: " + avgTime.toFixed(2) + " seconds", width / 2, height / 2 - 125 + d / 1.5);
+		await updateGameScore3();
 	}
 	fill(255);
 	text("Press anywhere to restart", width / 2, height / 2 + d / 5);
