@@ -180,6 +180,7 @@ async function AccValidation(num) {
 	account_signinHTML = document.getElementById('account');
 	account_signupHTML = document.getElementById('signup');
 	signInChecked = document.getElementById('signInChecked');
+	const actionButton = document.querySelector('.accBtn');
 
 	// CHANGING BETWEEN SIGN-IN AND SIGN-UP SCREEN
 	if (num === -1) {
@@ -200,6 +201,7 @@ async function AccValidation(num) {
 	
 	// SIGN-UP
 	if (num === 0) {
+		actionButton.disabled = true;
 
 		// get account data from the database
 		await getAcc();
@@ -207,6 +209,7 @@ async function AccValidation(num) {
 		// loop through the obtained data
 		if (account.length === 0) {
 			await signupAccount();
+			actionButton.disabled = false;
 			return;
 		}
 		for (let a = 0; a < account.length; a++) {
@@ -252,6 +255,7 @@ async function AccValidation(num) {
 				if (a == account.length - 1) {
 
 					await signupAccount();
+					actionButton.disabled = false;
 
 					break;
 				}
@@ -261,11 +265,13 @@ async function AccValidation(num) {
 
 	// SIGN-IN / LOG-IN
 	else if(num === 1) {
+		actionButton.disabled = true;
 
 		// get account data from the database
 		await getAcc();
 
 		if (account.length === 0) {
+			actionButton.disabled = false;
 			alert('No accounts found in database, please create one and sign in');
 		}
 
@@ -301,6 +307,7 @@ async function AccValidation(num) {
 				}
 		}
 	}
+	actionButton.disabled = false;
 
 	if (mode == 0) {
 		await getHighestScore();
@@ -813,13 +820,23 @@ function instruction() {
 	}
 }
 
+function removeDOMStyle() {
+	if (leaderboardBtn.style.opacity == 1) {
+		leaderboardBtn.style.opacity = 0;
+		leaderboardBtn.style.visibility = 'hidden';
+	}
+	bgColour.style.opacity = 0;
+	bgColour.style.visibility = 'hidden';
+}
+
 async function playGame() {
 	const leaderboardBtn = document.getElementById('leaderboardBtn');
+	const bgColour = document.getElementById('bgColour');
 
 	// sign-up / log-in section
 	if (mode == -1) {
-		background(59, 204, 202);
-		
+		bgColour.style.opacity = 1;
+		bgColour.style.visibility = 'visible';
 		// get the input HTML element
 		const account_signinHTML = document.getElementById('account');
 		account_signinHTML.style.visibility = 'visible';
@@ -827,12 +844,13 @@ async function playGame() {
 
 	// welcome screen
 	else if (mode == 0) {
-		
 		if (leaderboardBtn.style.opacity == 0) {
 			leaderboardBtn.style.opacity = 1;
 			leaderboardBtn.style.visibility = 'visible';
 			leaderboardBtn.childNodes[1].innerHTML = 'LEADERBOARD';
 		}
+		bgColour.style.opacity = 0;
+		bgColour.style.visibility = 'hidden';
 
 		background(55, 204, 187, 80);
 		cols.show();
@@ -849,10 +867,7 @@ async function playGame() {
 
 	// mode 1
 	} else if (mode == 1) {
-		if (leaderboardBtn.style.opacity == 1) {
-			leaderboardBtn.style.opacity = 0;
-			leaderboardBtn.style.visibility = 'hidden';
-		}
+		removeDOMStyle();
 
 		//draw background and foreground elements
 		background(bgImg);
@@ -880,10 +895,7 @@ async function playGame() {
 
 	// mode 2
 	} else if (mode == 2) {
-		if (leaderboardBtn.style.opacity == 1) {
-			leaderboardBtn.style.opacity = 0;
-			leaderboardBtn.style.visibility = 'hidden';
-		}
+		removeDOMStyle();
 
 		background(bgGarden);
 		drawBonus();
@@ -919,10 +931,7 @@ async function playGame() {
 		}
 
 	} else if (mode == 3) {
-		if (leaderboardBtn.style.opacity == 1) {
-			leaderboardBtn.style.opacity = 0;
-			leaderboardBtn.style.visibility = 'hidden';
-		}
+		removeDOMStyle();
 
 		// background(51);
 		setGradient(color('#96d8f2ff'), color('#727272ff'));
@@ -1355,6 +1364,7 @@ async function resetGameDisplay() {
 		}
 	} else if (mode === 3) {
 		await updateGameScore3();
+		text("Average time is: " + timePerTries.reduce((accumulator, current) => accumulator + current?.time, 0) / timePerTries.length + " seconds", width / 2, height / 2 - 125 + d / 1.5);
 	}
 	fill(255);
 	text("Press anywhere to restart", width / 2, height / 2 + d / 5);
@@ -1740,7 +1750,7 @@ function drawBoard() {
 		noLoop();
 		intro.stop();
 		game3WonSound.play();
-		setTimeout(resetGameDisplay, 1000);
+		setTimeout(resetGameDisplay, 2200);
 	}
 	if (frameCount % 60 == 0) {
 		// if (instructionClose3) {

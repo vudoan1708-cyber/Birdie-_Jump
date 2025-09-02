@@ -40,7 +40,7 @@
 			};
 			window.addEventListener('keypress', enterShortcut);
 		</script>
-		<div id = "canvasHolder" role="container">
+		<div id="canvasHolder" role="container">
 			<div id="account" role="container">
 				<div style="position: relative; width: 25%; margin: 20px auto" role="text holder">
 					<h3 style="text-align: left;">LOGIN</h3>
@@ -48,7 +48,7 @@
 				<p id="signInChecked" style="cursor: context-menu;"></p>
 				<input id="account_name_in" type="text" name="account_name_in" aria-label="account" placeholder="Enter Your Account Name"><br /><br />
 				<input id="pass_in" type="password" name="pass_in" aria-label="account password" placeholder="Enter Your Password"><br /><br />
-				<div class="accBtn" onclick="AccValidation(1)" role="button">ENTER</div>
+				<button class="accBtn" onclick="AccValidation(1)" role="button">ENTER</button>
 				<p style="color: rgb(16, 54, 204); text-decoration: underline; cursor: pointer" onclick="AccValidation(-1)">I Don't Have An Account</p>
 			</div>
 
@@ -58,7 +58,7 @@
 				</div>
 				<input id="account_name_up" type="text" name="account_name_up" aria-label="account" placeholder="Enter A New Account Name"><br /><br />
 				<input id="pass_up" type="password" name="pass_up" aria-label="account password" placeholder="Enter A New Password"><br /><br />
-				<div class="accBtn" onclick="AccValidation(0)" role="button">SIGN-UP</div>
+				<button class="accBtn" onclick="AccValidation(0)" role="button">SIGN-UP</button>
 				<p id="accChecked" style="cursor: context-menu;">You already had this account</p>
 				<p id="fieldChecked" style="cursor: context-menu;">You need to fill in the fields to proceed</p>
 			</div>
@@ -102,6 +102,9 @@
 			<div id="backBtn2" onclick="handleData(0, 0)" role="button">
 				<h3>Back</h3>
 			</div>
+
+			<div id="bgColour"></div>
+
 		</div>
 	</body>
 </html>

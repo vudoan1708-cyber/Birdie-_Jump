@@ -76,6 +76,7 @@ app.post('/api/score3', async function (request, response) {
         return;
     }
     await score3_db.update({ account_name: data.account_name }, { $set: data });
+    response.json(data);
 });
 
 app.get('/api/score3', async function (_, response) {
