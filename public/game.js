@@ -48,6 +48,7 @@ let brickImg;
 let portalImg;
 let portalGamePlayImg;
 let crateImg;
+let crateImg2;
 
 
 //assets:songs && sounds
@@ -101,7 +102,7 @@ let touchScreen = false,
 	finished = false;
 
 let countUpPortal = 0,
-	numImg = 18,
+	numImg = 19,
 	numSounds = 28,
 	loadingElement = 0;
 
@@ -582,6 +583,7 @@ function setup() {
 	portalImg = loadImage("assets/img/portal.png", mediaLoader);
 	portalGamePlayImg = loadImage("assets/img/portalGamePlay.png", mediaLoader);
 	crateImg = loadImage("assets/img/cartoon-wooden-crate.png", mediaLoader);
+	crateImg2 = loadImage("assets/img/brown-crate.png", mediaLoader);
 	cloudImg = loadImage("assets/img/cloud.png");
 	bgImg = loadImage("assets/img/bg1.png", mediaLoader);
 	bgMenuImg = loadImage("assets/img/bg.png", mediaLoader);
@@ -686,6 +688,18 @@ function selectingMathOperation({ key }) {
 	});
 
 	return btnClicked;
+}
+
+let skipTimes = 0;
+function clickSkipButton() {
+	if (mouseX > 0 && mouseX < rectWidth) {
+		if (mouseY > 0 && mouseY < rectHeight) {
+			skipTimes++;
+			givenNum.assignNewNumber(grid);
+			return true;
+		}
+	}
+	return false;
 }
 
 //game function
@@ -938,6 +952,7 @@ async function playGame() {
 		strokeWeight(2);
 		givenNum.show(); //number to achieve
 		drawMathOperators();
+		drawSkipButton();
 		// drawHealthBar();
 		drawSelections();
 		line(0, height / 3, width, height / 3); //line to separate teams (0, 150)
@@ -1072,6 +1087,7 @@ function mousePressed() {
 		}
 	} else if (mode === 3) {
 		selectingMathOperation({});
+		clickSkipButton();
 	}
 
 	// restart game
@@ -1364,7 +1380,12 @@ async function resetGameDisplay() {
 		}
 	} else if (mode === 3) {
 		await updateGameScore3();
-		text("Average time is: " + timePerTries.reduce((accumulator, current) => accumulator + current?.time, 0) / timePerTries.length + " seconds", width / 2, height / 2 - 125 + d / 1.5);
+		push();
+			textSize(width / 40);
+			text("Successful tries are: " + timePerTries.length, width / 2, height / 2 - 180 + d / 1.5);
+		pop();
+		const avgTime = timePerTries.reduce((accumulator, current) => accumulator + current?.time, 0) / timePerTries.length;
+		text("Average time is: " + avgTime.toFixed(2) + " seconds", width / 2, height / 2 - 125 + d / 1.5);
 	}
 	fill(255);
 	text("Press anywhere to restart", width / 2, height / 2 + d / 5);
@@ -1500,16 +1521,15 @@ function displayBonus() {
 		if (bonus2[b2].collected(birdie2)) {
 			bonus2.splice(b2, 1);
 			sizeReduceSound.play();
+			countUp = 0;
 			if (!counterTriggered) {
 				counterTriggered = true;
-
 			}
 			if (countUp < 400) {
 				return true;
 			} else {
 				return false;
 			}
-
 		}
 
 	}
@@ -1726,6 +1746,7 @@ function whenNumbersNotEquate() {
 function trackRecordGame3() {
 	timePerTries.push({
 		tries: clearTimes + 1,
+		skip: skipTimes,
 		lastRowCells: grid.map((rowCells) => rowCells[rowCells.length - 1]?.number),
 		selectedExpression: selectedExpressions.map((selection) => {
 			const __selection = { ...selection };
@@ -1737,6 +1758,7 @@ function trackRecordGame3() {
 	});
 	time = 0;
 	clearTimes = 0;
+	skipTimes = 0;
 }
 
 function endGame3() {
@@ -1845,19 +1867,35 @@ function drawMathOperators() {
 			fill(150);
 		} else if (op !== selectedOperator) {
 			fill(color('#FFB347'));
+			if (mouseX > width - ((idx + 1) * rectWidth) && mouseX < width - ((idx + 1) * rectWidth) + rectWidth) {
+				if (mouseY > 0 && mouseY < rectHeight) {
+					fill(255, 213, 128, 150);
+				}
+			}
 		} else {
 			fill(0, 200, 10);
-		}
-		if (mouseX > -idx * gap && mouseX < rectWidth) {
-			if (mouseY > 0 && mouseY < rectHeight) {
-				fill(255, 213, 128, 1);
-			}
 		}
 		rect(-idx * gap, 0, rectWidth, rectHeight);
 		fill(255, 200);
 		text(op, rectWidth / 2 - (idx * gap), rectHeight / 1.5);
 		pop();
 	});
+	pop();
+}
+function drawSkipButton() {
+	push();
+	textFont("Georgia");
+	textSize(30);
+	translate(0, 0);
+	fill(150);
+	if (mouseX > 0 && mouseX < rectWidth) {
+		if (mouseY > 0 && mouseY < rectHeight) {
+			fill(255, 213, 128, 150);
+		}
+	}
+	rect(0, 0, rectWidth, rectHeight);
+	fill(255, 200);
+	text('Skip', rectWidth / 2, rectHeight / 1.5);
 	pop();
 }
 

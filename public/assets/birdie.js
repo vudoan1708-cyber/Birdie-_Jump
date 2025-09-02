@@ -73,16 +73,21 @@ class Birdie2 {
 		collide.play(); //everytime it moves backwards, meaning it gets collided
 	}
 
-	jumpForwards() {
-		this.x_pos += d * 3; //bird's new position will be set 300 farther from current location
+	checkOffScreen() {
 		if (this.x_pos + this.size > width) {
 			return this.x_pos = width - this.size; // make sure the bird won't go off the right hand side of canvas
 		}
 	}
 
+	jumpForwards() {
+		this.x_pos += d * 3; //bird's new position will be set 300 farther from current location
+		this.checkOffScreen();
+	}
+
 
 	sizeReduce() {		
 		this.size = 30;
+		this.checkOffScreen();
 	}
 
 	jump() {

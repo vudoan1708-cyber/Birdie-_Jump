@@ -118,7 +118,7 @@ class GivenNum {
         const subsetLength = Math.floor(Math.random() * shuffledDigits.length) + 1;
         const chosenDigits = shuffledDigits.slice(0, subsetLength);
 
-        // let allOps = [];
+        let allOps = [];
 
         let expr = `${chosenDigits[0]}`;
 
@@ -130,14 +130,12 @@ class GivenNum {
             // Try to pick an operator that won't produce a fraction
             do {
                 const index = Math.floor(Math.random() * (beforeRound3 ? 1 : mathOperators.length));
-                console.log('index', index);
                 op = mathOperators[index];
-                console.log('op', op);
             } while (
-                op === '/' && !validDivision(expr, nextDigit) // retry until safe
+                tooManySameHardOperators(allOps, op) || (op === '/' && !validDivision(expr, nextDigit)) // retry until safe
             );
 
-            // allOps.push(op);
+            allOps.push(op);
 
             expr = `(${expr})${op}${nextDigit}`;
         }
@@ -164,9 +162,14 @@ class GivenNum {
     show() {
         if (endGame3()) return;
         push();
-        fill(255);
-        rectMode(CENTER);
-        rect(this.x, this.y - 10, d, 50);
+            push();
+            translate(this.x, this.y - 10);
+            let angle = frameCount += 0.1;
+            rotate(angle);
+	        imageMode(CENTER);
+            image(crateImg, 0, 0, d, d);
+            pop();
+        stroke(202, 153, 0);
         fill(0);
         textAlign(CENTER);
         textFont("Georgia");
