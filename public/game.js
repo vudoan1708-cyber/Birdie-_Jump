@@ -542,6 +542,7 @@ function setup() {
 	createCanvas(1200, 450).parent("canvasHolder");
 	angleMode(DEGREES);
 	textAlign(CENTER);
+	rectMode(CENTER);
 
 	gradientColors = [
     color(255, 100, 150),
@@ -640,10 +641,10 @@ let clearTimes = 0;
 function selectingMathOperation({ key }) {
 	let btnClicked = false;
 	[ ...mathOperators, 'Clear' ].forEach((op, idx) => {
-		const matchedKey = op === key || 'Escape' === key;
+		const matchedKey = key === op || key === 'Escape';
 		const leftEdge = width - ((idx + 1) * rectWidth);
-		if (matchedKey || (mouseX > leftEdge - (idx * gap) && mouseX < leftEdge + rectWidth - (idx * gap))) {
-			if (matchedKey || (mouseY > 0 && mouseY < rectHeight)) {
+		if (matchedKey || key === undefined && (mouseX > leftEdge - (idx * gap) && mouseX < leftEdge + rectWidth - (idx * gap))) {
+			if (matchedKey || key === undefined && (mouseY > 0 && mouseY < rectHeight)) {
 				if (op === 'Clear') {
 					const cellsWithNumbers = selectedExpressions.filter((exp) => exp.number);
 					cellsWithNumbers.forEach((cell) => {
@@ -785,6 +786,7 @@ function touchStarted() {
 		}
 	} else if (mode === 3) {
 		if (touchScreen) {
+			clickSkipButton();
 			const operationButtonClicked = selectingMathOperation({});
 			if (operationButtonClicked) return;
 			if (mouseX > 0 && mouseX < width) {
@@ -908,7 +910,7 @@ async function playGame() {
 		}
 
 	// mode 2
-	} else if (mode == 2) {
+	} else if (mode === 2) {
 		removeDOMStyle();
 
 		background(bgGarden);
@@ -944,7 +946,7 @@ async function playGame() {
 			instructionClose2 = true;
 		}
 
-	} else if (mode == 3) {
+	} else if (mode === 3) {
 		removeDOMStyle();
 
 		// background(51);
@@ -1126,7 +1128,6 @@ function draw() {
 		// Draw bar background (rounded rectangle)
 		noStroke();
 		fill(50);
-		rectMode(CENTER);
 		rect(0, 0, barWidth, barHeight, 20);
 
 		const segments = 200;
@@ -1220,7 +1221,6 @@ async function resetGameDisplay() {
 	finished = true;
 
 	push();
-	rectMode(CENTER);
 	fill(10, 80);
 	noStroke();
 	rect(width / 2, height / 2, 500, 200);
@@ -1614,7 +1614,7 @@ function drawFloors() {
 	}
 
 	if (time > 29) {
-		if (frameCount % 60 == 0 || frameCount % 80 == 0) {
+		if (frameCount % 60 === 0 || frameCount % 80 == 0) {
 			floors.push(new Floors());
 		}
 	}
@@ -1655,7 +1655,7 @@ function display2() {
 
 	}
 	//time count
-	if (frameCount % 60 == 0) {
+	if (frameCount % 60 === 0) {
 		if (instructionClose2) {
 			time++;
 		}
@@ -1768,17 +1768,6 @@ function endGame3() {
 
 let timePerTries = [];
 function drawBoard() {
-	if (endGame3()) {
-		noLoop();
-		intro.stop();
-		game3WonSound.play();
-		setTimeout(resetGameDisplay, 2200);
-	}
-	if (frameCount % 60 == 0) {
-		// if (instructionClose3) {
-			time++;
-		// }
-	}
 	//draw a board
 	//display rects and numbers in accordance to each cell's position
 	for (let i = 0; i < grid.length; i++) {
@@ -1815,10 +1804,6 @@ function drawBoard() {
 					grid[i][j].showHit(); // turns green when gets hit
 					game_score.play();
 
-					// if ( mode == 3) {
-					// 	score++;
-					// 	console.log(score);
-					// }
 					trackRecordGame3();
 					whenNumbersEquate(i, j);
 
@@ -1835,6 +1820,18 @@ function drawBoard() {
 				}
 			}
 		}
+	}
+
+	if (endGame3()) {
+		noLoop();
+		intro.stop();
+		game3WonSound.play();
+		setTimeout(resetGameDisplay, 2200);
+	}
+	if (floor(frameCount % 60) === 0) {
+		// if (instructionClose3) {
+			time++;
+		// }
 	}
 }
 
@@ -1861,13 +1858,16 @@ function drawMathOperators() {
 	textSize(30);
 	[ ...mathOperators, 'Clear' ].forEach((op, idx) => {
 		push();
-		translate(width - ((idx + 1) * rectWidth), 0);
+
+		const xLocation = width - ((idx + 1) * rectWidth) + rectWidth / 2;
+		translate(xLocation, rectHeight / 2);
 		// text("100 / 100", width / 2, (height / 3 - d) / 1.25);
 		if (selectedExpressions.length === 0) {
 			fill(150);
 		} else if (op !== selectedOperator) {
 			fill(color('#FFB347'));
-			if (mouseX > width - ((idx + 1) * rectWidth) && mouseX < width - ((idx + 1) * rectWidth) + rectWidth) {
+			// hover interaction is not affected by translate()
+			if (mouseX > xLocation - rectWidth / 2 - (idx * gap) && mouseX < xLocation - rectWidth / 2 - (idx * gap) + rectWidth) {
 				if (mouseY > 0 && mouseY < rectHeight) {
 					fill(255, 213, 128, 150);
 				}
@@ -1877,7 +1877,7 @@ function drawMathOperators() {
 		}
 		rect(-idx * gap, 0, rectWidth, rectHeight);
 		fill(255, 200);
-		text(op, rectWidth / 2 - (idx * gap), rectHeight / 1.5);
+		text(op, -idx * gap, rectHeight / 5);
 		pop();
 	});
 	pop();
@@ -1886,7 +1886,7 @@ function drawSkipButton() {
 	push();
 	textFont("Georgia");
 	textSize(30);
-	translate(0, 0);
+	translate(rectWidth / 2, rectHeight / 2);
 	fill(150);
 	if (mouseX > 0 && mouseX < rectWidth) {
 		if (mouseY > 0 && mouseY < rectHeight) {
@@ -1895,7 +1895,7 @@ function drawSkipButton() {
 	}
 	rect(0, 0, rectWidth, rectHeight);
 	fill(255, 200);
-	text('Skip', rectWidth / 2, rectHeight / 1.5);
+	text('Skip', 0, rectHeight / 5);
 	pop();
 }
 
@@ -1904,11 +1904,11 @@ function drawSelections() {
 	textFont("Georgia");
 	textSize(25);
 	fill(255, 0, 200, 100);
-	rect(0, height / 3, width, height / 3 - d);
+	translate(width / 2, (height / 2) - d / 2);
+	rect(0, 0, width, height / 3 - d);
 	const current = getTheCurrentExpressionResult();
 	if (!current) {
 		fill(255, 150);
-		translate(width / 2, (height / 2) - d / 2.25);
 		let prgressText = '';
 		if (endGame3()) {
 			textSize(30);
@@ -1917,11 +1917,10 @@ function drawSelections() {
 		} else {
 			prgressText = 'Make the bird jump to select a number';
 		}
-		text(prgressText, 0, 2);
+		text(prgressText, 0, 8);
 	} else {
 		fill(255, 200);
-		translate(width / 2, (height / 2) - d / 2.25);
-		text(current, 0, 0);
+		text(current, 0, 8);
 	}
 	pop();
 }
